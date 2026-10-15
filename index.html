@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JRFAdda Ignition 1.0 & 2.0 — UGC NET Master Mock Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe',
+                            300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6',
+                            600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+        }
+        .h-dvh-screen { height: 100vh; height: 100dvh; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+
+        .option-card { transition: all 0.15s ease; border: 2px solid #e2e8f0; }
+        .option-card:hover { border-color: #93c5fd; background-color: #f8fafc; }
+        .option-card.selected { border-color: #2563eb; background-color: #eff6ff; box-shadow: 0 3px 10px rgba(37, 99, 235, 0.1); }
+
+        .palette-btn { transition: all 0.15s ease; position: relative; }
+        .palette-btn.active { outline: 3px solid #1d4ed8; outline-offset: 2px; z-index: 10; }
+
+        /* Authentic NTA Status Colors */
+        .status-not-visited { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+        .status-not-answered { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+        .status-answered { background: #10b981; color: #ffffff; border: 1px solid #059669; }
+        .status-marked { background: #ede9fe; color: #7c3aed; border: 1px solid #c4b5fd; }
+        .status-answered-marked { background: #7c3aed; color: #ffffff; border: 1px solid #6d28d9; }
+        .status-answered-marked::after {
+            content: ''; position: absolute; bottom: 2px; right: 2px;
+            width: 8px; height: 8px; background: #10b981; border-radius: 50%; border: 1.5px solid white;
+        }
+
+        .time-box.active {
+            background-color: #eff6ff; border-color: #2563eb; color: #1e40af;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+        .timer-circle-progress {
+            transition: stroke-dashoffset 1s linear;
+            transform: rotate(-90deg); transform-origin: 50% 50%;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body, #results-view { height: auto !important; overflow: visible !important; background: white !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-brand-200 selection:text-brand-900">
+
+    <!-- CUSTOM MODAL -->
+    <div id="custom-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+            <div class="flex items-start gap-4">
+                <div id="modal-icon-container" class="w-11 h-11 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center shrink-0 text-lg">
+                    <i id="modal-icon" class="fa-solid fa-circle-info"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 id="modal-title" class="text-base font-bold text-slate-800">Notification</h3>
+                    <p id="modal-message" class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed break-words"></p>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end gap-2.5">
+                <button id="modal-cancel-btn" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs sm:text-sm hover:bg-slate-50 hidden">Cancel</button>
+                <button id="modal-confirm-btn" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs sm:text-sm shadow-md">Okay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 1. SETUP VIEW (MOBILE & DESKTOP OPTIMIZED) ==================== -->
+    <div id="setup-view" class="min-h-screen w-full flex flex-col lg:justify-center bg-slate-100 p-0 sm:p-4 lg:p-6">
+        <div class="bg-white sm:rounded-3xl shadow-xl border border-slate-200/80 flex flex-col lg:flex-row overflow-hidden max-w-6xl w-full mx-auto min-h-screen sm:min-h-0">
+
+            <!-- Left / Top Compact Banner -->
+            <div class="lg:w-4/12 bg-gradient-to-br from-slate-900 via-brand-900 to-slate-900 p-5 sm:p-8 text-white flex flex-col justify-between relative overflow-hidden shrink-0">
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between lg:justify-start gap-2 mb-3 sm:mb-5">
+                        <span class="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase text-brand-200 border border-white/10">
+                            <i class="fa-solid fa-bolt text-amber-400"></i> JRFAdda Ignition Hub
+                        </span>
+                        <span class="text-[11px] font-semibold text-brand-200 lg:hidden">Target: Dec 2026</span>
+                    </div>
+                    <h1 class="text-xl sm:text-3xl font-extrabold leading-tight tracking-tight">UGC NET CS & Paper 1 <span class="text-brand-400 block sm:inline">Mock Portal</span></h1>
+                    <p class="text-slate-300 text-xs sm:text-sm mt-1.5 sm:mt-3 leading-relaxed hidden sm:block">
+                        Select Ignition 2.0, Ignition 1.0, or Paper 1 to load topic-wise `.js` question sets directly from your GitHub repository.
+                    </p>
+                </div>
+
+                <!-- Built-in Ready File Quick Launch -->
+                <div class="relative z-10 mt-4 lg:my-6 bg-white/10 backdrop-blur-md p-3.5 rounded-2xl border border-white/15">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-300 block">Built-In Ready Demo</span>
+                            <div class="text-xs sm:text-sm font-bold text-white truncate">1. OS Basics by Aditi Ma'am (25 Qs)</div>
+                        </div>
+                        <button onclick="loadBuiltinOSBasics()" class="shrink-0 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition-all active:scale-95">
+                            Load Now
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative z-10 hidden lg:flex items-center justify-between text-xs text-slate-400 border-t border-white/10 pt-4">
+                    <span>50/50 Laptop & Mobile Engine</span>
+                    <span class="font-bold text-brand-300">GitHub Pages Ready</span>
+                </div>
+            </div>
+
+            <!-- Right Configuration Panel -->
+            <div class="lg:w-8/12 p-4 sm:p-8 flex flex-col justify-between bg-white flex-1">
+                <div class="space-y-5">
+
+                    <!-- STEP 1: SELECT BATCH -->
+                    <div>
+                        <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">1. Select Batch / Mode</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="batch-tabs">
+                            <button type="button" onclick="selectBatch('ignition-2.0')" data-batch="ignition-2.0" class="batch-tab py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-brand-600 bg-brand-50 text-brand-700 flex items-center justify-center gap-1.5 transition-all">
+                                <i class="fa-solid fa-fire text-teal-500"></i> Ignition 2.0
+                            </button>
+                            <button type="button" onclick="selectBatch('ignition-1.0')" data-batch="ignition-1.0" class="batch-tab py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition-all">
+                                <i class="fa-solid fa-rocket text-purple-500"></i> Ignition 1.0
+                            </button>
+                            <button type="button" onclick="selectBatch('paper-1')" data-batch="paper-1" class="batch-tab py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition-all">
+                                <i class="fa-solid fa-book-open text-blue-500"></i> Paper 1
+                            </button>
+                            <button type="button" onclick="selectBatch('custom')" data-batch="custom" class="batch-tab py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition-all">
+                                <i class="fa-solid fa-folder-open text-amber-500"></i> Local .JS
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: SUBJECT & TOPIC (.JS) SELECTOR (FOR GITHUB REPO) -->
+                    <div id="repo-selector-box" class="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <!-- Subject Dropdown -->
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">2. Select Subject / Unit</label>
+                                <div class="relative">
+                                    <select id="subject-select" onchange="handleSubjectChange()" class="w-full appearance-none bg-white border border-slate-300 text-slate-800 font-bold text-xs sm:text-sm py-3 px-3.5 pr-9 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                                </div>
+                            </div>
+
+                            <!-- Topic (.js file) Dropdown -->
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">3. Select Topic (.js File)</label>
+                                <div class="relative">
+                                    <select id="topic-select" onchange="handleTopicChange()" class="w-full appearance-none bg-white border border-slate-300 text-slate-800 font-bold text-xs sm:text-sm py-3 px-3.5 pr-9 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Repo File Path & Status Bar -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200/70 text-xs">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="px-2 py-0.5 bg-slate-200 text-slate-700 rounded font-mono text-[10px] truncate max-w-[230px] sm:max-w-md" id="expected-path-badge">questions/...</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="repo-load-status" class="font-bold text-slate-500 text-xs">Checking file...</span>
+                                <button type="button" onclick="fetchSelectedTopicJS()" class="text-xs font-bold text-brand-600 hover:underline flex items-center gap-1">
+                                    <i class="fa-solid fa-rotate"></i> Reload
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ALTERNATIVE STEP 2: MANUAL LOCAL FILE UPLOAD (IF 'LOCAL .JS' TAB SELECTED) -->
+                    <div id="custom-upload-box" class="hidden p-4 bg-brand-50/60 rounded-2xl border border-brand-200 flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-brand-900 mb-0.5">Upload Custom Question File (.js)</label>
+                            <p class="text-xs text-slate-500">Pick any <code class="bg-white px-1 py-0.5 rounded border">rawQuestions</code> file stored on your phone or laptop</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <label for="file-upload" class="cursor-pointer bg-white hover:bg-brand-50 border-2 border-brand-500 text-brand-700 font-bold py-2 px-4 rounded-xl text-xs sm:text-sm shrink-0 shadow-sm">
+                                <i class="fa-solid fa-file-import mr-1"></i> Browse .js
+                            </label>
+                            <input id="file-upload" type="file" accept=".js" class="hidden" onchange="handleLocalFileUpload(event)">
+                            <span id="local-file-status" class="text-xs font-bold text-slate-600 truncate max-w-[140px]">No file</span>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: TIME ALLOCATION BOXES -->
+                    <div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400">4. Time Control (Per Question)</label>
+                            <div class="inline-flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-[11px]">
+                                <button type="button" id="mode-overall-btn" onclick="setTimerMode('overall')" class="px-2.5 py-1 rounded-md font-bold bg-white text-brand-700 shadow-sm">Overall Timer</button>
+                                <button type="button" id="mode-perq-btn" onclick="setTimerMode('per-question')" class="px-2.5 py-1 rounded-md font-semibold text-slate-600">Strict Per-Q</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2" id="time-boxes-container">
+                            <button type="button" onclick="selectTimeBox(0)" data-time="0" class="time-box py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center">
+                                <i class="fa-solid fa-infinity text-sm text-emerald-600 mb-0.5"></i>
+                                <span class="text-xs font-extrabold">No Limit</span>
+                                <span class="text-[9px] text-slate-400">Practice</span>
+                            </button>
+                            <button type="button" onclick="selectTimeBox(30)" data-time="30" class="time-box py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center">
+                                <span class="text-base font-black">30s</span>
+                                <span class="text-[9px] text-slate-500 font-semibold">Rapid</span>
+                            </button>
+                            <button type="button" onclick="selectTimeBox(45)" data-time="45" class="time-box py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center">
+                                <span class="text-base font-black">45s</span>
+                                <span class="text-[9px] text-slate-500 font-semibold">Sprint</span>
+                            </button>
+                            <button type="button" onclick="selectTimeBox(60)" data-time="60" class="time-box active py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center">
+                                <span class="text-base font-black">60s</span>
+                                <span class="text-[9px] text-brand-600 font-bold">Standard</span>
+                            </button>
+                            <button type="button" onclick="selectTimeBox(90)" data-time="90" class="time-box py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center">
+                                <span class="text-base font-black">90s</span>
+                                <span class="text-[9px] text-slate-500 font-semibold">Numerical</span>
+                            </button>
+                            <button type="button" onclick="selectTimeBox(120)" data-time="120" class="time-box py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center">
+                                <span class="text-base font-black">120s</span>
+                                <span class="text-[9px] text-slate-500 font-semibold">DI / Deep</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4: SHUFFLE & LAUNCH BAR -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 mt-5 border-t border-slate-100">
+                    <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input type="checkbox" id="setting-shuffle" checked class="w-4 h-4 accent-brand-600 rounded cursor-pointer">
+                        <span class="text-xs sm:text-sm text-slate-700 font-semibold">Shuffle Questions</span>
+                    </label>
+
+                    <button id="start-btn" onclick="startTest()" disabled class="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-brand-500/25 disabled:shadow-none transition-all active:scale-95 flex justify-center items-center gap-2 text-sm sm:text-base">
+                        <span>Select a Valid Question Set</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 2. TEST INTERFACE VIEW (100dvh MOBILE + SPLIT LAPTOP) ==================== -->
+    <div id="test-view" class="h-dvh-screen w-full flex flex-col hidden bg-slate-100 overflow-hidden">
+
+        <!-- Compact Top Header -->
+        <header class="h-14 sm:h-16 bg-white border-b border-slate-200 px-3 sm:px-6 flex items-center justify-between shrink-0 z-30">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <button onclick="confirmExitToSetup()" title="Exit to Setup" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-arrow-left text-xs sm:text-sm"></i>
+                </button>
+                <div class="truncate">
+                    <div class="flex items-center gap-1.5">
+                        <span id="header-batch-badge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-brand-100 text-brand-700 shrink-0">Ignition 2.0</span>
+                        <h1 id="header-unit-title" class="font-bold text-slate-800 text-xs sm:text-sm truncate">Operating System</h1>
+                    </div>
+                    <p id="test-title-header" class="text-[11px] text-slate-500 font-medium truncate">1. OS Basics by Aditi Ma'am</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                <!-- Timer Pill -->
+                <div id="timer-badge-container" class="flex items-center gap-1.5 bg-red-50 text-red-600 px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-red-200 font-mono font-bold text-xs sm:text-base">
+                    <i id="timer-icon" class="fa-regular fa-clock animate-pulse text-xs"></i>
+                    <span id="time-text">00:00:00</span>
+                </div>
+
+                <!-- Mobile Palette Drawer Trigger Button -->
+                <button onclick="toggleMobilePalette()" class="lg:hidden flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-3 py-2 rounded-xl border border-slate-300">
+                    <i class="fa-solid fa-grip text-brand-600"></i>
+                    <span id="mobile-palette-counter">0/25</span>
+                </button>
+
+                <!-- Desktop Submit Button -->
+                <button onclick="confirmSubmit()" class="hidden sm:flex bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm items-center gap-1.5 text-xs sm:text-sm">
+                    <i class="fa-solid fa-paper-plane text-xs"></i> <span>Submit</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="flex-1 flex flex-col lg:flex-row gap-0 lg:gap-4 lg:p-4 overflow-hidden max-w-[1920px] mx-auto w-full relative">
+
+            <!-- LEFT: Question Area + Sticky Bottom Controls -->
+            <div class="w-full lg:w-8/12 xl:w-9/12 bg-white lg:rounded-2xl lg:shadow-sm lg:border border-slate-200 flex flex-col overflow-hidden flex-1">
+
+                <!-- Question Bar -->
+                <div class="bg-slate-50 border-b border-slate-200 px-4 sm:px-6 py-2.5 sm:py-3 flex justify-between items-center shrink-0">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-brand-600 text-white text-xs sm:text-sm font-extrabold px-3 py-1 rounded-lg" id="q-number-badge">Q 1 / 25</span>
+                        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">+2 Marks</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div id="q-timer-indicator" class="text-red-600 font-bold text-xs bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full hidden"></div>
+                        <button onclick="confirmSubmit()" class="sm:hidden text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scrollable Question & Options -->
+                <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8" id="q-scroll-area">
+                    <div class="max-w-4xl mx-auto pb-4">
+                        <div id="q-text" class="text-base sm:text-lg md:text-xl text-slate-800 leading-relaxed font-semibold mb-6 select-text"></div>
+                        <div id="options-container" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- Thumb-Friendly Bottom Action Bar -->
+                <div class="bg-white sm:bg-slate-50 border-t border-slate-200 px-3 py-2.5 sm:px-6 sm:py-3 shrink-0 grid grid-cols-4 sm:flex sm:flex-wrap items-center justify-between gap-2">
+                    <button onclick="goPrev()" id="prev-btn" class="col-span-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold py-2.5 px-2 sm:px-4 rounded-xl flex items-center justify-center gap-1.5 text-xs sm:text-sm disabled:opacity-40">
+                        <i class="fa-solid fa-angle-left"></i> <span>Prev</span>
+                    </button>
+
+                    <button onclick="markAndNext()" class="col-span-1 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold py-2.5 px-2 sm:px-4 rounded-xl flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                        <i class="fa-regular fa-bookmark"></i> <span class="hidden md:inline">Mark for Review</span><span class="md:hidden">Review</span>
+                    </button>
+
+                    <button onclick="clearResponse()" class="col-span-1 bg-white hover:bg-slate-100 text-slate-600 border border-slate-300 font-bold py-2.5 px-2 sm:px-4 rounded-xl flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                        <i class="fa-solid fa-eraser"></i> <span>Clear</span>
+                    </button>
+
+                    <button id="primary-next-btn" onclick="handlePrimaryAction()" class="col-span-1 sm:ml-auto bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 px-3 sm:px-7 rounded-xl shadow-md flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                        <span>Next</span> <i class="fa-solid fa-angle-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Backdrop for Palette Drawer -->
+            <div id="palette-backdrop" onclick="toggleMobilePalette()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 hidden lg:hidden"></div>
+
+            <!-- RIGHT: Question Palette (Desktop Sidebar + Mobile Slide-Up Bottom Drawer) -->
+            <aside id="palette-drawer" class="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl lg:rounded-2xl shadow-2xl lg:shadow-sm border border-slate-200 flex flex-col overflow-hidden transition-transform duration-300 translate-y-full lg:translate-y-0 lg:static lg:w-4/12 xl:w-3/12 max-h-[80dvh] lg:max-h-none">
+
+                <!-- Drawer Header -->
+                <div class="p-3.5 sm:p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full bg-brand-600 text-white font-extrabold text-xs flex items-center justify-center">JRF</div>
+                        <div>
+                            <div class="font-bold text-slate-800 text-xs sm:text-sm">Question Palette</div>
+                            <div id="side-progress-text" class="text-[11px] font-bold text-emerald-600">0/25 Answered</div>
+                        </div>
+                    </div>
+                    <button onclick="toggleMobilePalette()" class="lg:hidden w-8 h-8 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Status Legend -->
+                <div class="p-3 border-b border-slate-200 bg-white grid grid-cols-2 gap-2 text-[11px] font-semibold text-slate-600 shrink-0">
+                    <div class="flex items-center gap-1.5"><div id="count-answered" class="w-5 h-5 rounded status-answered flex items-center justify-center text-[10px] font-bold">0</div><span>Answered</span></div>
+                    <div class="flex items-center gap-1.5"><div id="count-not-answered" class="w-5 h-5 rounded status-not-answered flex items-center justify-center text-[10px] font-bold">0</div><span>Not Answered</span></div>
+                    <div class="flex items-center gap-1.5"><div id="count-not-visited" class="w-5 h-5 rounded status-not-visited flex items-center justify-center text-[10px] font-bold">0</div><span>Not Visited</span></div>
+                    <div class="flex items-center gap-1.5"><div id="count-marked" class="w-5 h-5 rounded status-marked flex items-center justify-center text-[10px] font-bold">0</div><span>Marked</span></div>
+                    <div class="col-span-2 flex items-center gap-1.5"><div id="count-answered-marked" class="w-5 h-5 rounded status-answered-marked flex items-center justify-center text-[10px] font-bold">0</div><span>Answered & Marked for Review</span></div>
+                </div>
+
+                <!-- Scrollable Grid -->
+                <div class="flex-1 overflow-y-auto p-4 bg-white">
+                    <div class="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-2.5" id="palette-grid"></div>
+                </div>
+
+                <!-- Mobile Drawer Submit Button -->
+                <div class="p-3 bg-slate-50 border-t border-slate-200 lg:hidden shrink-0">
+                    <button onclick="toggleMobilePalette(); confirmSubmit();" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-sm shadow">
+                        Submit Assessment
+                    </button>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- ==================== 3. WAITING VIEW (WITH INSTANT SKIP OPTION) ==================== -->
+    <div id="waiting-view" class="h-dvh-screen w-full bg-slate-900 text-white hidden flex-col items-center justify-center p-4 select-none">
+        <div class="max-w-xl w-full bg-white/10 backdrop-blur-xl rounded-3xl border border-white/15 p-6 sm:p-10 flex flex-col items-center text-center shadow-2xl">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold uppercase mb-4">
+                <i class="fa-solid fa-circle-check"></i> Submitted
+            </div>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-white mb-1">Analyzing Your Performance</h2>
+            <p class="text-xs sm:text-sm text-brand-200 mb-6">Unlocks automatically, or tap skip below:</p>
+
+            <div class="relative w-36 h-36 sm:w-44 sm:h-44 flex items-center justify-center mb-6">
+                <svg class="w-full h-full" viewBox="0 0 160 160">
+                    <circle cx="80" cy="80" r="70" stroke="rgba(255,255,255,0.12)" stroke-width="10" fill="none"></circle>
+                    <circle id="waiting-circle" class="timer-circle-progress" cx="80" cy="80" r="70" stroke="#38bdf8" stroke-width="10" stroke-linecap="round" fill="none" stroke-dasharray="439.82" stroke-dashoffset="0"></circle>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="waiting-seconds" class="text-4xl sm:text-5xl font-black font-mono">20</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-brand-200 mt-1">Seconds</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/60 border border-white/10 rounded-2xl p-4 sm:p-5 w-full mb-5">
+                <p id="motivational-quote-text" class="text-xs sm:text-sm font-medium text-slate-100 italic leading-relaxed"></p>
+            </div>
+
+            <button onclick="skipWaitingScreen()" class="px-5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs sm:text-sm border border-white/20 transition-all">
+                Skip & View Results Now <i class="fa-solid fa-bolt ml-1 text-amber-300"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== 4. RESULTS & SOLUTIONS VIEW ==================== -->
+    <div id="results-view" class="min-h-screen w-full bg-slate-100 hidden">
+        <div class="bg-white border-b border-slate-200 px-4 sm:px-6 py-5 shadow-sm sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span id="report-paper-badge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-brand-100 text-brand-700">Ignition 2.0</span>
+                        <span id="report-unit-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 truncate">OS</span>
+                    </div>
+                    <h1 class="text-lg sm:text-2xl font-extrabold text-slate-800 truncate" id="report-title">Performance Report</h1>
+                </div>
+                <div class="flex gap-2 no-print">
+                    <button onclick="resetToSetup()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2 px-3.5 rounded-xl text-xs sm:text-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate-right"></i> New Test
+                    </button>
+                    <button onclick="window.print()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold py-2 px-4 rounded-xl text-xs sm:text-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">Save PDF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+            <!-- 4 KPI Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+                <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+                    <span class="text-slate-400 font-bold text-[10px] sm:text-xs uppercase">Total Score</span>
+                    <div class="text-2xl sm:text-4xl font-black text-slate-800 my-1" id="res-score">0/0</div>
+                    <div id="res-percent" class="inline-block px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[11px]">0%</div>
+                </div>
+                <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+                    <span class="text-slate-400 font-bold text-[10px] sm:text-xs uppercase">Accuracy</span>
+                    <div class="text-2xl sm:text-4xl font-black text-slate-800 my-1" id="res-accuracy">0%</div>
+                    <div class="text-[11px] text-slate-500 font-semibold">Correct / Attempted</div>
+                </div>
+                <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+                    <span class="text-slate-400 font-bold text-[10px] sm:text-xs uppercase">Attempted</span>
+                    <div class="text-2xl sm:text-4xl font-black text-slate-800 my-1" id="res-attempted">0/0</div>
+                    <div class="flex justify-center gap-2 text-[11px] font-bold">
+                        <span class="text-emerald-600" id="res-correct">0 Right</span> • <span class="text-red-600" id="res-wrong">0 Wrong</span>
+                    </div>
+                </div>
+                <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+                    <span class="text-slate-400 font-bold text-[10px] sm:text-xs uppercase">Time Taken</span>
+                    <div class="text-xl sm:text-3xl font-black text-slate-800 my-1.5 font-mono" id="res-time">00:00:00</div>
+                    <div id="res-avg-time" class="text-[11px] text-slate-500 font-semibold">Avg: 0s / Q</div>
+                </div>
+            </div>
+
+            <!-- Solutions Filter & List -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                    <h2 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-brand-500"></i> Detailed Solutions & Explanations
+                    </h2>
+                    <div class="flex flex-wrap gap-1.5 no-print">
+                        <button onclick="filterReview('all')" data-filter="all" class="review-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-600 text-white">All</button>
+                        <button onclick="filterReview('correct')" data-filter="correct" class="review-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600">Correct</button>
+                        <button onclick="filterReview('incorrect')" data-filter="incorrect" class="review-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600">Wrong</button>
+                        <button onclick="filterReview('unattempted')" data-filter="unattempted" class="review-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600">Skipped</button>
+                    </div>
+                </div>
+                <div class="space-y-4" id="review-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 1. EMBEDDED OS BASICS QUESTION SET (FROM YOUR UPLOADED .JS FILE) ====================
+        const BUILTIN_OS_BASICS = [
+            { q: "What is an operating system?", opts: ["a) interface between the hardware and application programs", "b) collection of programs that manages hardware resources", "c) system service provider to the application programs", "d) all of the mentioned"], ans: 3, exp: "<b>d) all of the mentioned</b><br>An Operating System acts as an intermediary between user/user applications/application programs and hardware. It is a program that manages hardware resources. It provides services to application programs." },
+            { q: "To access the services of the operating system, the interface is provided by the ___________.", opts: ["a) Library", "b) System calls", "c) Assembly instructions", "d) API"], ans: 1, exp: "<b>b) System calls</b><br>To access services of the Operating System an interface is provided by the System Calls. Generally, these are functions written in C and C++. Open, Close, Read, Write are some of most prominently used system calls." },
+            { q: "Which one of the following is not true?", opts: ["a) kernel remains in the memory during the entire computer session", "b) kernel is made of various modules which can not be loaded in running operating system", "c) kernel is the first part of the operating system to load into memory during booting", "d) kernel is the program that constitutes the central core of the operating system"], ans: 1, exp: "<b>b) kernel is made of various modules which can not be loaded in running operating system</b><br>• Kernel is the first program that is loaded in memory when OS is loading as well as it remains in memory till OS is running.<br>• Kernel modules can be loaded and unloaded in run-time i.e. in running OS." },
+            { q: "Where is the operating system placed in the memory?", opts: ["a) either low or high memory (depending on the location of interrupt vector)", "b) in the low memory", "c) in the high memory", "d) none of the mentioned"], ans: 0, exp: "<b>a) either low or high memory (depending on the location of interrupt vector)</b>" },
+            { q: "Cascading termination refers to the termination of all child processes if the parent process terminates ______", opts: ["a) Normally or abnormally", "b) Abnormally", "c) Normally", "d) None of the mentioned"], ans: 0, exp: "<b>a) Normally or abnormally</b><br>Cascading termination refers to the termination of all child processes if the parent process terminates Normally or Abnormally." },
+            { q: "Hard real time operating system has ______________ jitter than a soft real time operating system.", opts: ["a) equal", "b) more", "c) less", "d) none of the mentioned"], ans: 2, exp: "<b>c) less</b>" },
+            { q: "On systems where there are multiple operating system, the decision to load a particular one is done by _____________", opts: ["a) process control block", "b) file control block", "c) boot loader", "d) bootstrap"], ans: 2, exp: "<b>c) boot loader</b>" },
+            { q: "The Kernel is _______ user-level threads.", opts: ["a) a part of", "b) the creator of", "c) unaware of", "d) aware of"], ans: 2, exp: "<b>c) unaware of</b><br>User-level threads are managed by a thread library at the user level; the kernel is unaware of them." },
+            { q: "The _______ program initializes all aspects of the system, from CPU registers to device controllers and the contents of main memory, and then starts the operating system.", opts: ["a) bootstrap", "b) main", "c) bootloader", "d) rom"], ans: 0, exp: "<b>a) bootstrap</b>" },
+            { q: "If an operating system does not allow a child process to exist when the parent process has been terminated, this phenomenon is called as-", opts: ["a) Threading", "b) Cascading termination", "c) Zombie termination", "d) Process killing"], ans: 1, exp: "<b>b) Cascading termination</b>" },
+            { q: "In Unix, which system call creates the new process?", opts: ["a) create", "b) fork", "c) new", "d) none of the mentioned"], ans: 1, exp: "<b>b) fork</b>" },
+            { q: "Which of the following do not belong to queues for processes?", opts: ["a) Job Queue", "b) PCB queue", "c) Device Queue", "d) Ready Queue"], ans: 1, exp: "<b>b) PCB queue</b>" },
+            { q: "If all processes I/O bound, the ready queue will almost always be ______ and the Short term Scheduler will have a ______ to do.", opts: ["a) full, little", "b) full, lot", "c) empty, little", "d) empty, lot"], ans: 2, exp: "<b>c) empty, little</b><br>If all processes are I/O bound, the ready queue will almost always be empty and the short-term scheduler will have little to do." },
+            { q: "What is a short-term scheduler?", opts: ["a) It selects which process has to be brought into the ready queue", "b) It selects which process has to be executed next and allocates CPU", "c) It selects which process to remove from memory by swapping", "d) None of the mentioned"], ans: 1, exp: "<b>b) It selects which process has to be executed next and allocates CPU</b>" },
+            { q: "Suppose that a process is in \"Blocked\" state waiting for some I/O service. When the service is completed, it goes to the __________", opts: ["a) Running state", "b) Ready state", "c) Suspended state", "d) Terminated state"], ans: 1, exp: "<b>b) Ready state</b>" },
+            { q: "The context of a process in the PCB of a process does not contain __________", opts: ["a) the value of the CPU registers", "b) the process state", "c) memory-management information", "d) context switch time"], ans: 3, exp: "<b>d) context switch time</b>" },
+            { q: "The operating system and the other processes are protected from being modified by an already running process because", opts: ["a) they run at different time instants and not in parallel", "b) they are in different logical addresses", "c) they use a protection algorithm in the scheduler", "d) every address generated by the CPU is being checked against the relocation and limit parameters"], ans: 3, exp: "<b>d) every address generated by the CPU is being checked against the relocation and limit parameters</b>" },
+            { q: "Which of the following does not interrupt a running process?", opts: ["a) A device", "b) Timer", "c) Scheduler process", "d) Power failure"], ans: 2, exp: "<b>c) Scheduler process</b>" },
+            { q: "Dispatch latency is defined as", opts: ["a) the speed of dispatching a process from running to the ready state", "b) the time of dispatching a process from running to ready state and keeping the CPU idle", "c) the time to stop one process and start running another one", "d) none of these"], ans: 2, exp: "<b>c) the time to stop one process and start running another one</b>" },
+            { q: "When several processes access the same data concurrently and the outcome of the execution depends on the particular order in which the access takes place is called ________", opts: ["a) dynamic condition", "b) race condition", "c) essential condition", "d) critical condition"], ans: 1, exp: "<b>b) race condition</b>" },
+            { q: "Suppose a system contains n processes and system uses the round-robin algorithm for CPU scheduling then which data structure is best suited ready queue of the process", opts: ["a) stack", "b) queue", "c) circular queue", "d) tree"], ans: 2, exp: "<b>c) circular queue</b>" },
+            { q: "There are three processes in the ready queue. When the currently running process requests for I/O how many process switches take place?", opts: ["a) 1", "b) 2", "c) 3", "d) 4"], ans: 1, exp: "<b>b) 2</b>" },
+            { q: "In Linux Operating System, when _________ is invoked, it is passed a set of flags that determine how much sharing is to take place between the parent and child tasks.", opts: ["a) fork()", "b) clone()", "c) pthread()", "d) thread()"], ans: 1, exp: "<b>b) clone()</b>" },
+            { q: "In which of the following cases, a process executing in user mode requires an entry into the OS mode?", opts: ["a) Executing printf ( )", "b) Accessing a general purpose register", "c) Decrementing an unsigned integer value stored in a register beyond zero", "d) Adding values of two registers using ADD instruction"], ans: 0, exp: "<b>a) Executing printf ( )</b>" },
+            { q: "User level threads are threads that are visible to the programmer and are unknown to the kernel... Which of the following statements is/are true ?<br><br><b>(a)</b> (i) Many-to-one maps many user threads to one kernel thread (ii) One-to-one maps one user thread to one kernel thread (iii) Many-to-many maps many user threads to smaller or equal kernel threads<br><b>(b)</b> Reverse mappings", opts: ["a) (a) is true; (b) is false", "b) (a) is false; (b) is true", "c) Both (a) and (b) are true", "d) Both (a) and (b) are false"], ans: 0, exp: "<b>a) (a) is true; (b) is false</b>" }
+        ];
+
+        // ==================== 2. REPOSITORY CATALOG (MATCHES PYTHON GENERATOR) ====================
+        function sanitizeFilename(idx, title) {
+            const clean = title.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+            return `${idx}___${clean}.js`;
+        }
+
+        const REPO_CATALOG = {
+            "ignition-2.0": {
+                label: "Ignition 2.0",
+                subjects: [
+                    { folder: "09-os", name: "Operating System (OS)", topics: ["Memory Management, Disk Scheduling by Aditi Ma'am", "Process Management by Aditi Ma'am", "Disk Scheduling & Misc. by Aditi Ma'am", "Memory Management by Aditi Ma'am", "Process Syn. & Deadlock by Aditi Ma'am", "Process Management (2) by Aditi Ma'am", "OS Basics by Aditi Ma'am"] },
+                    { folder: "01-dm", name: "Discrete Mathematics (DM)", topics: ["DM by Aditi Ma'am", "Graph & Group Theory by Aditi Ma'am", "Set, Relation & Lattice by Aditi Ma'am", "Propositional & Predicate Logic by Aditi Ma'am"] },
+                    { folder: "02-dbms", name: "Database Management (DBMS)", topics: ["Functional Dependency by Aditi Ma'am", "File System & DBMS Architecture by Aditi Ma'am", "SQL by Aditi Ma'am", "Indexing & Transaction by Aditi Ma'am", "Normalization by Aditi Ma'am", "ERD & FD by Aditi Ma'am", "DBMS Basics by Aditi Ma'am"] },
+                    { folder: "03-se", name: "Software Engineering (SE)", topics: ["SDLC Models & Designing by Aditi Ma'am", "SE Numericals by Aditi Ma'am", "Testing & Project Management by Aditi Ma'am", "Software Models & Designing by Aditi Ma'am"] },
+                    { folder: "04-pcg", name: "Programming & Graphics (PCG)", topics: ["CG & Prog by Aditi Ma'am", "Programming by Aditi Ma'am", "CG by Aditi Ma'am"] },
+                    { folder: "05-toc", name: "TOC & Compilers", topics: ["TOC & Compiler by Aditi Ma'am", "Semantic Analysis & ICG by Aditi Ma'am", "Compiler Phases & Parsers by Aditi Ma'am", "CFG & TM by Aditi Ma'am", "FA & PDA by Aditi Ma'am", "Chomsky Hierarchy & RE by Aditi Ma'am"] },
+                    { folder: "06-coa", name: "Computer Org. & Arch. (COA)", topics: ["Addressing, I/O Interfacing & Pipelining by Aditi Ma'am", "Pipelining & M/C Instruction by Aditi Ma'am", "Memory Interfacing & Control Unit by Aditi Ma'am", "Instruction Formats & Addressing Modes by Aditi Ma'am", "Basics & Cache Mapping by Aditi Ma'am"] },
+                    { folder: "07-cn", name: "Computer Networking (CN)", topics: ["OSI Models by Aditi Ma'am", "Network Security by Aditi Ma'am", "Transport & Other Layers by Aditi Ma'am", "Network Layer by Aditi Ma'am", "Data Link Layer by Aditi Ma'am", "CN Basics by Aditi Ma'am"] },
+                    { folder: "08-daa", name: "Algorithms (DAA)", topics: ["Data Structure & Algorithm by Aditi Ma'am", "Sorting & Searching by Aditi Ma'am", "Trees by Aditi Ma'am", "DS by Aditi Ma'am"] },
+                    { folder: "10-ai", name: "Artificial Intelligence (AI)", topics: ["AI by Aditi Ma'am", "Miscellaneous Topics by Aditi Ma'am", "Fuzzy Logic by Aditi Ma'am", "Searching & Game Theory by Aditi Ma'am"] },
+                    { folder: "11-dl", name: "Digital Logic (DL)", topics: ["Combinational & Sequential Circuits by Aditi Ma'am", "Digital Logics by Aditi Ma'am"] }
+                ]
+            },
+            "ignition-1.0": {
+                label: "Ignition 1.0",
+                subjects: [
+                    { folder: "09-os", name: "Operating System (OS)", topics: ["01 Memory Management, Disk Scheduling by Aditi Ma'am", "02 Process Management by Aditi Ma'am", "03 Disc Scheduling | OS | By Aditi Ma'am", "04 Memory Management | OS | By Aditi Ma'am", "05 Deadlock & Miscellaneous Topics | OS | By Aditi Ma'am", "06 OS Basics & Process Management | OS | By Aditi Ma'am"] },
+                    { folder: "01-dm", name: "Discrete Mathematics (DM)", topics: ["01 DM by Aditi Ma'am", "02 Miscellaneous Topics | DM | By Aditi Ma'am", "03 Graph & Group Theory | DM | By Aditi Ma'am", "04 Set & Relation | DM | By Aditi Ma'am", "05 Propositional Logic | DM | By Aditi Ma'am"] },
+                    { folder: "02-dbms", name: "Database Management (DBMS)", topics: ["01 Functional Dependency by Aditi Ma'am", "02 File System & DBMS Architecture by Aditi Ma'am", "03 SQL Part 2 | DBMS | By Aditi Ma'am", "04 SQL Part 1 | DBMS | By Aditi Ma'am", "05 Miscellaneous Topics | DBMS | By Aditi Ma'am", "06 Transaction | DBMS | By Aditi Ma'am", "07 Normalization | DBMS | By Aditi Ma'am", "08 Functional Dependency | DBMS | By Aditi Ma'am", "09 Basics of DBMS | By Aditi Ma'am"] },
+                    { folder: "03-se", name: "Software Engineering (SE)", topics: ["01 SDLC Models & Designing by Aditi Ma'am", "02 SE Numericals | SE | By Aditi Ma'am", "03 Software Testing | SE | By Aditi Ma'am", "04 Miscellaneous Terms | SE | By Aditi Ma'am", "05 Software Designing | SE | By Aditi Ma'am", "06 SDLC Models | SE | By Aditi Ma'am"] },
+                    { folder: "04-pcg", name: "Programming & Graphics (PCG)", topics: ["01 CG & Prog by Aditi Ma'am", "02 Programming PYQs Part 3 | By Aditi Ma'am", "03 Programming PYQs Part 2 | By Aditi Ma'am", "04 Programming PYQs Part 1 | By Aditi Ma'am", "05 CG Numericals | CG | By Aditi Ma'am", "06 Theory based PYQ on CG | CG | By Aditi Ma'am"] },
+                    { folder: "05-toc", name: "TOC & Compilers", topics: ["01 TOC & Compiler by Aditi Ma'am", "02 Compiler | By Aditi Ma'am", "03 Turing Machine | TOC | By Aditi Ma'am", "04 REC & RE Language | TOC | By Aditi Ma'am", "05 Ambiguity in CFG | TOC | By Aditi Ma'am", "06 Context Free Grammar Part 2 | TOC | By Aditi Ma'am", "07 Context Free Grammar Part 1 | TOC | By Aditi Ma'am", "08 Regular Expression | TOC | By Aditi Ma'am", "09 Regular Language | TOC | By Aditi Ma'am", "10 Chomsky Hierarchy | TOC | By Aditi Ma'am"] },
+                    { folder: "06-coa", name: "Computer Org. & Arch. (COA)", topics: ["01 Addressing, I/O Interfacing & Pipelining by Aditi Ma'am", "02 Machine Instructions | COA | By Aditi Ma'am", "03 Memory Interfacing & Control Units | COA | By Aditi Ma'am", "04 Cache Memory & Addressing Modes Part 1 | COA | By Aditi Ma'am", "05 Cache Memory & Addressing Modes Part 2 | COA | By Aditi Ma'am"] },
+                    { folder: "07-cn", name: "Computer Networking (CN)", topics: ["01 OSI models by Aditi Ma'am", "02 Miscellaneous Topics | CN | By Aditi Ma'am", "03 Transport Layer | CN | By Aditi Ma'am", "04 Network Layer Part 2 | CN | By Aditi Ma'am", "05 Network Layer | CN | By Aditi Ma'am", "06 Data Link Layer | CN | By Aditi Ma'am", "07 Physical Layer Part 2 | CN | By Aditi Ma'am", "08 Physical Layer | CN | By Aditi Ma'am", "09 OSI Layers | CN | By Aditi Ma'am"] },
+                    { folder: "08-daa", name: "Algorithms (DAA)", topics: ["01 Data Structure & Algorithm by Aditi Ma'am", "02 Time Complexities Part 2 | DAA | By Aditi Ma'am", "03 Time Complexities | DAA | By Aditi Ma'am", "04 Greedy & Dynamic Algorithm | DAA | By Aditi Ma'am", "05 Trees Part 2 | DAA | By Aditi Ma'am", "06 Trees | DAA | By Aditi Ma'am", "07 Basics of DAA | DAA | By Aditi Ma'am"] },
+                    { folder: "10-ai", name: "Artificial Intelligence (AI)", topics: ["01 AI by Aditi Ma'am", "02 Fuzzy Logic Part 2 | AI | By Aditi Ma'am", "03 Fuzzy Logic | AI | By Aditi Ma'am", "04 Agents & Searching Algorithms | AI | By Aditi Ma'am"] },
+                    { folder: "11-dl", name: "Digital Logic (DL)", topics: ["01 Combinational & Sequential Circuits by Aditi Ma'am", "02 Sequential Circuits & Number System | By Aditi Ma'am", "03 Boolean Algebra & Combinational Circuit | By Aditi Ma'am"] },
+                    { folder: "12-cs", name: "Counselling Session", topics: ["01 Counselling Session By Aditi Ma'am"] }
+                ]
+            },
+            "paper-1": {
+                label: "Paper 1",
+                subjects: [
+                    { folder: "01-teaching-aptitude", name: "Unit I: Teaching Aptitude", topics: ["10 What is Teaching Aptitude | Levels of Teaching", "09 Bloom's Taxonomy by Aditi Mam", "08 Learner's Characteristics by Aditi Mam", "07 Swayam and SwayamPrabha by Aditi Mam", "06 Swayam Plus and MOOC by Aditi Mam", "05 LMS AND TOOLS by Aditi Mam", "04 DCS + PRACTICE SESSION by Aditi Mam", "03 Cooperative Learning and Strategies", "02 Teacher and Learner Centered Methods | Learning Disabilities", "01 Transfer of Learning by Aditi Mam"] },
+                    { folder: "02-research-aptitude", name: "Unit II: Research Aptitude", topics: ["12 Research Intro by Aditi Ma'am", "11 Research Process by Aditi Ma'am", "10 Research Types by Aditi Ma'am Coming Soon", "09 Research Types Part 2 by Aditi Ma'am", "08 Research Types Part 3 by Aditi Ma'am", "07 Research Types Part 4 by Aditi Ma'am", "06 Variables by Aditi Ma'am", "05 Sampling by Aditi Ma'am", "04 Hypothesis by Aditi Ma'am", "03 Hypothesis Testing by Aditi Ma'am", "02 Hypothesis Testing Part 2 by Aditi Ma'am", "01 Hypothesis Testing Part 3 by Aditi Ma'am Live Soon"] },
+                    { folder: "08-ict", name: "Unit VIII: ICT", topics: ["15 Generation of Computer by Aditi Ma'am", "14 Generation of Language by Aditi Ma'am", "13 Softwares & its Types by Aditi Ma'am", "12 Printers & VDU by Aditi Ma'am", "11 Memory System by Aditi Ma'am", "10 Memory Numerical by Aditi Ma'am", "09 OSI & Network Devices by Aditi Ma'am", "08 Internet by Aditi Ma'am", "07 Misc Terms of Internet by Aditi Ma'am", "06 Malwares by Aditi Ma'am", "05 Types of Virsus & Hackers by Aditi Ma'am", "04 MS Office by Aditi Ma'am", "03 Number System by Aditi Ma'am", "02 Web Gen & Advanced Technology by Aditi Ma'am", "01 Full Forms & Inventors by Aditi Ma'am"] },
+                    { folder: "05-maths-reasoning", name: "Unit V: Maths & Reasoning", topics: ["20 Average Part 1 by Vishwas Sir", "19 Average Part 2 by Vishwas Sir", "18 Average Part 3 by Vishwas Sir", "17 Age by Vishwas Sir", "16 Age Part 2 by Vishwas Sir", "15 Doubt clearing session + Percentage Introduction by Vishwas Sir", "14 Percentage by Vishwas Sir", "13 Percentage Part 2 by Vishwas Sir", "12 Percentage Part 3 by Vishwas Sir", "11 Percentage - 4 by Vishwas Sir", "10 Percentage - 5 by Vishwas Sir", "09 Profit Loss - 1 by Vishwas Sir", "08 Profit Loss - 2 by Vishwas Sir", "07 Profit Loss - 3 & Doubt Session by Vishwas Sir", "06 Discount by Vishwas Sir", "05 Discount -2 + Doubt Clearing Session", "04 Simple Interest by Vishwas Sir", "03 Simple Interest Part 2", "02 Simple Interest Part 3", "01 Compound Interest 1 by Vishwas Sir Live Now"] },
+                    { folder: "09-pde", name: "Unit IX: People, Dev & Env", topics: ["13 Demo Session of Paper 1 by Priyanshi Ma'am", "12 smog, pollutants and its types (part 1)", "11 pollutants and its types (part 2) by Priyanshi Mam", "10 types of lakes and toxicity", "09 water pollution by Priyanshi Mam", "08 Energy and its type by Priyanshi Mam", "07 Energy and its type", "06 Noise Pollution by Priyanshi Mam", "05 Toxicity and solid waste management", "04 Natural Disaster (part 1) by Priyanshi Mam", "03 Protocols and conferences (part 1) by Priyanshi Ma'am", "02 Protocols and conferences (part 2) by Priyanshi Ma'am", "01 MCQs Practice Session (2020-2026)by Priyanshi Mam"] },
+                    { folder: "03-comprehension", name: "Unit III: Comprehension", topics: ["01 Reading Comprehension Set 1"] },
+                    { folder: "04-communication", name: "Unit IV: Communication", topics: ["01 Communication PYQs Set 1"] },
+                    { folder: "06-logical-reasoning", name: "Unit VI: Logical Reasoning", topics: ["01 Logical Reasoning & Indian Logic Set 1"] },
+                    { folder: "07-data-interpretation", name: "Unit VII: Data Interpretation", topics: ["01 Data Interpretation Set 1"] },
+                    { folder: "10-higher-education", name: "Unit X: Higher Education", topics: ["01 Higher Education System Set 1"] }
+                ]
+            }
+        };
+
+        const consistencyQuotes = [
+            "Success in UGC NET isn't built on a single high score, but on the quiet discipline of showing up every single day to analyze, learn, and improve.",
+            "Every wrong answer you discover today is one less mistake you will make in the examination hall.",
+            "Mastery across Paper 1 and Paper 2 comes from relentless daily practice. Trust your preparation."
+        ];
+
+        // ==================== 3. STATE VARIABLES ====================
+        let currentBatchKey = "ignition-2.0";
+        let currentSubjectObj = null;
+        let activeTopicTitle = "";
+        let testTimerMode = "overall";
+        let timeLimitPerQ = 60;
+
+        let questions = [];
+        let currentQ = 0;
+        let answers = {};
+        let statuses = {};
+        let timeRemaining = 0;
+        let timerInterval = null;
+        let waitingInterval = null;
+        let totalTimeSpent = 0;
+        let isDataLoaded = false;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            selectBatch('ignition-2.0');
+        });
+
+        // ==================== 4. BATCH / SUBJECT / TOPIC SELECTION ====================
+        function selectBatch(batchKey) {
+            currentBatchKey = batchKey;
+            document.querySelectorAll('.batch-tab').forEach(btn => {
+                if (btn.getAttribute('data-batch') === batchKey) {
+                    btn.className = "batch-tab py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-brand-600 bg-brand-50 text-brand-700 flex items-center justify-center gap-1.5 transition-all";
+                } else {
+                    btn.className = "batch-tab py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition-all";
+                }
+            });
+
+            const repoBox = document.getElementById('repo-selector-box');
+            const customBox = document.getElementById('custom-upload-box');
+
+            if (batchKey === 'custom') {
+                repoBox.classList.add('hidden');
+                customBox.classList.remove('hidden');
+                customBox.classList.add('flex');
+                disableStartButton("Upload a .js File to Begin");
+                return;
+            }
+
+            repoBox.classList.remove('hidden');
+            customBox.classList.add('hidden');
+            customBox.classList.remove('flex');
+
+            const subjSelect = document.getElementById('subject-select');
+            subjSelect.innerHTML = '';
+            REPO_CATALOG[batchKey].subjects.forEach((s, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = s.name;
+                subjSelect.appendChild(opt);
+            });
+
+            handleSubjectChange();
+        }
+
+        function handleSubjectChange() {
+            const subjIdx = parseInt(document.getElementById('subject-select').value) || 0;
+            currentSubjectObj = REPO_CATALOG[currentBatchKey].subjects[subjIdx];
+
+            const topicSelect = document.getElementById('topic-select');
+            topicSelect.innerHTML = '';
+            currentSubjectObj.topics.forEach((t, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = `${idx + 1}. ${t}`;
+                // Default to "OS Basics by Aditi Ma'am" on first load so the user can test immediately
+                if (currentBatchKey === 'ignition-2.0' && currentSubjectObj.folder === '09-os' && idx === 6) {
+                    opt.selected = true;
+                }
+                topicSelect.appendChild(opt);
+            });
+
+            handleTopicChange();
+        }
+
+        function handleTopicChange() {
+            fetchSelectedTopicJS();
+        }
+
+        function fetchSelectedTopicJS() {
+            const topicIdx = parseInt(document.getElementById('topic-select').value) || 0;
+            const rawTitle = currentSubjectObj.topics[topicIdx];
+            activeTopicTitle = rawTitle;
+
+            const fileName = sanitizeFilename(topicIdx + 1, rawTitle);
+            const relativePath = `questions/${currentBatchKey}/${currentSubjectObj.folder}/${fileName}`;
+
+            document.getElementById('expected-path-badge').textContent = relativePath;
+            const statusEl = document.getElementById('repo-load-status');
+            statusEl.textContent = "Loading...";
+            statusEl.className = "font-bold text-amber-600 text-xs";
+
+            const oldScript = document.getElementById('dynamic-questions-script');
+            if (oldScript) oldScript.remove();
+            window.rawQuestions = undefined;
+
+            const script = document.createElement('script');
+            script.id = 'dynamic-questions-script';
+            script.src = relativePath + "?v=" + Date.now();
+
+            script.onload = () => {
+                if (typeof rawQuestions !== 'undefined' && Array.isArray(rawQuestions) && rawQuestions.length > 0) {
+                    window.rawQuestions = rawQuestions;
+                    isDataLoaded = true;
+                    statusEl.textContent = `✓ ${rawQuestions.length} Qs Ready`;
+                    statusEl.className = "font-bold text-emerald-600 text-xs";
+                    enableStartButton(`Start Test (${rawQuestions.length} Qs)`);
+                } else {
+                    handleFallbackOrError(rawTitle, relativePath);
+                }
+            };
+
+            script.onerror = () => {
+                handleFallbackOrError(rawTitle, relativePath);
+            };
+
+            document.body.appendChild(script);
+        }
+
+        function handleFallbackOrError(rawTitle, relativePath) {
+            const statusEl = document.getElementById('repo-load-status');
+            // Automatic fallback if user selected "OS Basics by Aditi Ma'am" before running setup_repo.py
+            if (rawTitle.toLowerCase().includes("os basics")) {
+                window.rawQuestions = JSON.parse(JSON.stringify(BUILTIN_OS_BASICS));
+                isDataLoaded = true;
+                statusEl.textContent = `✓ 25 Qs Ready (Built-in OS Basics)`;
+                statusEl.className = "font-bold text-emerald-600 text-xs";
+                enableStartButton(`Start Test (25 Qs)`);
+            } else {
+                isDataLoaded = false;
+                statusEl.textContent = `File not found yet`;
+                statusEl.className = "font-bold text-rose-500 text-xs";
+                disableStartButton(`Run setup_repo.py or Upload .js`);
+            }
+        }
+
+        function loadBuiltinOSBasics() {
+            selectBatch('ignition-2.0');
+            document.getElementById('subject-select').value = 0;
+            handleSubjectChange();
+            document.getElementById('topic-select').value = 6;
+            window.rawQuestions = JSON.parse(JSON.stringify(BUILTIN_OS_BASICS));
+            activeTopicTitle = "OS Basics by Aditi Ma'am";
+            isDataLoaded = true;
+            const statusEl = document.getElementById('repo-load-status');
+            statusEl.textContent = `✓ 25 Qs Ready (Built-in OS Basics)`;
+            statusEl.className = "font-bold text-emerald-600 text-xs";
+            enableStartButton(`Start OS Basics Test (25 Qs)`);
+        }
+
+        function handleLocalFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            activeTopicTitle = file.name.replace(/\.js$/i, '');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    window.rawQuestions = undefined;
+                    const script = document.createElement('script');
+                    script.textContent = e.target.result + "\n;if(typeof rawQuestions !== 'undefined'){ window.rawQuestions = rawQuestions; }";
+                    document.body.appendChild(script);
+
+                    if (Array.isArray(window.rawQuestions) && window.rawQuestions.length > 0) {
+                        isDataLoaded = true;
+                        document.getElementById('local-file-status').textContent = `✓ ${window.rawQuestions.length} Qs`;
+                        document.getElementById('local-file-status').className = "text-xs font-bold text-emerald-600";
+                        enableStartButton(`Start Test (${window.rawQuestions.length} Qs)`);
+                    } else {
+                        throw new Error("Invalid format");
+                    }
+                } catch (err) {
+                    showModal({ title: "Invalid .js File", message: "Could not find a valid 'rawQuestions' array inside the selected file.", type: "error" });
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function enableStartButton(label) {
+            const btn = document.getElementById('start-btn');
+            btn.disabled = false;
+            btn.innerHTML = `<span>${label}</span> <i class="fa-solid fa-play text-xs"></i>`;
+        }
+
+        function disableStartButton(label) {
+            const btn = document.getElementById('start-btn');
+            btn.disabled = true;
+            btn.innerHTML = `<span>${label}</span> <i class="fa-solid fa-lock text-xs"></i>`;
+        }
+
+        // ==================== 5. TIMER & TEST ENGINE ====================
+        function setTimerMode(mode) {
+            testTimerMode = mode;
+            document.getElementById('mode-overall-btn').className = mode === 'overall'
+                ? "px-2.5 py-1 rounded-md font-bold bg-white text-brand-700 shadow-sm"
+                : "px-2.5 py-1 rounded-md font-semibold text-slate-600";
+            document.getElementById('mode-perq-btn').className = mode === 'per-question'
+                ? "px-2.5 py-1 rounded-md font-bold bg-white text-brand-700 shadow-sm"
+                : "px-2.5 py-1 rounded-md font-semibold text-slate-600";
+        }
+
+        function selectTimeBox(seconds) {
+            timeLimitPerQ = seconds;
+            document.querySelectorAll('#time-boxes-container .time-box').forEach(box => {
+                box.classList.toggle('active', parseInt(box.getAttribute('data-time')) === seconds);
+            });
+        }
+
+        function startTest() {
+            if (!isDataLoaded || !window.rawQuestions) return;
+
+            questions = JSON.parse(JSON.stringify(window.rawQuestions));
+            if (document.getElementById('setting-shuffle').checked) {
+                for (let i = questions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [questions[i], questions[j]] = [questions[j], questions[i]];
+                }
+            }
+
+            answers = {};
+            statuses = {};
+            for (let i = 0; i < questions.length; i++) statuses[i] = 'not-visited';
+            statuses[0] = 'not-answered';
+
+            const batchLabel = currentBatchKey === 'custom' ? 'Custom Test' : REPO_CATALOG[currentBatchKey].label;
+            const subjName = currentBatchKey === 'custom' ? 'Local File' : currentSubjectObj.name;
+
+            document.getElementById('header-batch-badge').textContent = batchLabel;
+            document.getElementById('header-unit-title').textContent = subjName;
+            document.getElementById('test-title-header').textContent = activeTopicTitle;
+
+            document.getElementById('report-paper-badge').textContent = batchLabel;
+            document.getElementById('report-unit-badge').textContent = subjName;
+            document.getElementById('report-title').textContent = activeTopicTitle;
+
+            totalTimeSpent = 0;
+            const timerBadge = document.getElementById('timer-badge-container');
+            if (timeLimitPerQ > 0) {
+                timeRemaining = testTimerMode === 'overall' ? timeLimitPerQ * questions.length : timeLimitPerQ;
+                timerBadge.className = "flex items-center gap-1.5 bg-red-50 text-red-600 px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-red-200 font-mono font-bold text-xs sm:text-base";
+                document.get
