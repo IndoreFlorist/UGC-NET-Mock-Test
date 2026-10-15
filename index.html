@@ -164,13 +164,13 @@
                     </div>
                 </div>
 
-                <!-- STEP 2: CHOOSE IGNITION BATCH OR PAPER 1 -->
+                <!-- STEP 2: CHOOSE IGNITION BATCH OR PAPER 1 OR LOCAL UPLOAD -->
                 <div id="wizard-step-2" class="hidden space-y-5">
                     <div class="text-center max-w-lg mx-auto">
                         <span id="wizard-greeting-pill" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-extrabold mb-1.5">
                             <i class="fa-solid fa-user-graduate"></i> Welcome, Future JRF Tushar
                         </span>
-                        <p class="text-xs sm:text-sm text-slate-500 font-medium">Select which JRFAdda Batch or Paper you want to practice right now:</p>
+                        <p class="text-xs sm:text-sm text-slate-500 font-medium">Select which JRFAdda Batch, Paper, or Local File you want to practice right now:</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
@@ -233,8 +233,8 @@
                             <h3 class="text-xl font-black text-slate-800">Upload Local .JS File</h3>
                             <p class="text-xs text-slate-600 font-medium mt-1">Browse & load any custom .js file directly from your phone/laptop</p>
                             <div class="mt-4 pt-2.5 border-t border-amber-100 flex items-center justify-between text-xs font-extrabold text-amber-700">
-                                <span>Upload From Device</span>
-                                <i class="fa-solid fa-chevron-right"></i>
+                                <span>Select File from System</span>
+                                <i class="fa-solid fa-upload"></i>
                             </div>
                         </button>
                     </div>
@@ -256,6 +256,30 @@
                         <span id="wizard-selected-subject-pill" class="text-xs font-extrabold px-3 py-1 rounded-full bg-indigo-100 text-indigo-800">Operating System</span>
                     </div>
                     <div id="wizard-topics-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                </div>
+
+                <!-- STEP 5: DIRECT IN-WIZARD LOCAL .JS FILE UPLOADER -->
+                <div id="wizard-step-5" class="hidden space-y-5">
+                    <div class="max-w-xl mx-auto text-center space-y-4">
+                        <div class="p-8 rounded-3xl border-2 border-dashed border-amber-400 bg-gradient-to-b from-amber-50/70 to-orange-50/30 flex flex-col items-center justify-center">
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center text-2xl shadow-lg shadow-amber-500/25 mb-4">
+                                <i class="fa-solid fa-file-arrow-up"></i>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-black text-slate-800">Choose a .JS Question File from Your Device</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 max-w-md mt-1 mb-6">
+                                Select any JavaScript question file (<code class="bg-white px-1.5 py-0.5 rounded border text-amber-700 font-mono">var rawQuestions = [...]</code>) stored on your laptop or smartphone.
+                            </p>
+
+                            <label for="file-upload" class="cursor-pointer bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold py-3.5 px-8 rounded-2xl shadow-lg shadow-amber-500/25 transition-all transform active:scale-95 inline-flex items-center gap-2.5 text-sm sm:text-base">
+                                <i class="fa-solid fa-folder-open"></i> Browse System Files (.js)
+                            </label>
+
+                            <div id="wizard-upload-feedback" class="mt-4 hidden items-center gap-2 px-4 py-2 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span id="wizard-upload-filename">File Loaded!</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -307,7 +331,7 @@
 
                 <div class="relative z-10 text-xs text-brand-200/70 flex items-center justify-between border-t border-white/10 pt-3">
                     <span>Laptop & Smartphone Optimized</span>
-                    <span class="font-semibold text-brand-200">v3.0 Pro</span>
+                    <span class="font-semibold text-brand-200">v3.1 Pro</span>
                 </div>
             </div>
 
@@ -347,7 +371,7 @@
                                 <button type="button" id="batch-btn-paper-1" onclick="selectBatch('paper-1')" class="py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 transition-all flex items-center justify-center gap-1.5">
                                     <i class="fa-solid fa-book-open text-blue-500"></i> Paper 1
                                 </button>
-                                <button type="button" id="batch-btn-custom" onclick="selectBatch('custom')" class="py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 transition-all flex items-center justify-center gap-1.5">
+                                <button type="button" id="batch-btn-custom" onclick="selectBatch('custom', true)" class="py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 transition-all flex items-center justify-center gap-1.5">
                                     <i class="fa-solid fa-folder-open text-amber-500"></i> Local .JS
                                 </button>
                             </div>
@@ -387,14 +411,14 @@
                         </div>
 
                         <!-- STEP 2 ALT: LOCAL FILE UPLOAD -->
-                        <div id="local-upload-container" class="hidden p-4 bg-brand-50/60 rounded-2xl border border-brand-100 flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div id="local-upload-container" class="hidden p-4 bg-amber-50/70 rounded-2xl border-2 border-amber-200 flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-brand-900 mb-1">Upload Custom Question Bank (.js)</label>
-                                <p class="text-xs text-slate-500">Select any <code class="bg-white px-1.5 py-0.5 rounded border border-slate-200 text-brand-700 font-mono">rawQuestions</code> file from your phone or laptop</p>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-amber-900 mb-1">2. Upload Custom Question Bank (.js)</label>
+                                <p class="text-xs text-slate-600">Select any <code class="bg-white px-1.5 py-0.5 rounded border border-slate-200 text-amber-700 font-mono">rawQuestions</code> file from your phone or laptop</p>
                             </div>
                             <div class="flex items-center gap-3">
-                                <label for="file-upload" class="cursor-pointer bg-white hover:bg-brand-50 border-2 border-brand-500 text-brand-700 font-bold py-2 px-4 rounded-xl transition-all flex items-center gap-2 shadow-sm text-xs sm:text-sm shrink-0">
-                                    <i class="fa-solid fa-file-import"></i> Select .js File
+                                <label for="file-upload" class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2 shadow-sm text-xs sm:text-sm shrink-0">
+                                    <i class="fa-solid fa-file-import"></i> Browse .js File
                                 </label>
                                 <input id="file-upload" type="file" accept=".js" class="hidden" onchange="handleFileUpload(event)">
                                 <div class="flex flex-col min-w-[120px]">
@@ -848,7 +872,7 @@
             openOnboardingWizard();
         });
 
-        // ==================== 4. COLORFUL 4-STEP ONBOARDING WIZARD ====================
+        // ==================== 4. COLORFUL ONBOARDING WIZARD ====================
         function openOnboardingWizard() {
             const modal = document.getElementById('onboarding-modal');
             modal.classList.remove('hidden');
@@ -864,8 +888,9 @@
 
         function setWizardStep(step) {
             currentWizardStep = step;
-            ['wizard-step-1', 'wizard-step-2', 'wizard-step-3', 'wizard-step-4'].forEach((id, idx) => {
-                document.getElementById(id).classList.toggle('hidden', (idx + 1) !== step);
+            ['wizard-step-1', 'wizard-step-2', 'wizard-step-3', 'wizard-step-4', 'wizard-step-5'].forEach((id, idx) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('hidden', (idx + 1) !== step);
             });
 
             const backBtn = document.getElementById('wizard-back-btn');
@@ -900,11 +925,21 @@
                 stepBadge.innerText = 'Step 4 of 4 • Topic (.js File)';
                 title.innerText = 'Choose Your Topic Question Bank';
                 renderWizardTopics();
+            } else if (step === 5) {
+                backBtn.classList.remove('hidden');
+                backBtn.classList.add('inline-flex');
+                progressBar.style.width = '100%';
+                stepBadge.innerText = 'Step 3 of 3 • System File Upload';
+                title.innerText = 'Upload .JS Question Bank from Your Device';
             }
         }
 
         function wizardPrevStep() {
-            if (currentWizardStep > 1) setWizardStep(currentWizardStep - 1);
+            if (currentWizardStep === 5) {
+                setWizardStep(2);
+            } else if (currentWizardStep > 1) {
+                setWizardStep(currentWizardStep - 1);
+            }
         }
 
         function selectWizardCandidate(fullName, shortName, themeColor) {
@@ -916,9 +951,13 @@
         }
 
         function selectWizardBatch(batchKey) {
-            selectBatch(batchKey);
+            selectBatch(batchKey, false);
             if (batchKey === 'custom') {
-                closeOnboardingWizard();
+                setWizardStep(5);
+                // Also trigger the native file dialog right away for convenience
+                setTimeout(() => {
+                    document.getElementById('file-upload').click();
+                }, 150);
                 return;
             }
             setWizardStep(3);
@@ -996,7 +1035,7 @@
         }
 
         // ==================== 5. SETUP SCREEN BATCH / SUBJECT / TOPIC LOGIC ====================
-        function selectBatch(batchKey) {
+        function selectBatch(batchKey, autoOpenPicker = false) {
             selectedBatch = batchKey;
             ['ignition-2.0', 'ignition-1.0', 'paper-1', 'custom'].forEach(key => {
                 const btn = document.getElementById('batch-btn-' + key);
@@ -1017,6 +1056,9 @@
                 localContainer.classList.add('flex');
                 resetUploadState();
                 updateSetupSummaryBanner();
+                if (autoOpenPicker) {
+                    setTimeout(() => document.getElementById('file-upload').click(), 100);
+                }
                 return;
             }
 
@@ -1088,7 +1130,6 @@
 
             script.onload = () => {
                 if (typeof rawQuestions !== 'undefined' && Array.isArray(rawQuestions) && rawQuestions.length > 0) {
-                    // If the file is just the 1-question placeholder for OS Basics, use the full 25 built-in questions automatically!
                     if (rawQuestions.length === 1 && topicTitle.toLowerCase().includes("os basics")) {
                         window.rawQuestions = JSON.parse(JSON.stringify(BUILTIN_OS_BASICS));
                     } else {
@@ -1227,8 +1268,12 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
+                    const oldScript = document.getElementById('dynamic-questions-script');
+                    if (oldScript) oldScript.remove();
+
                     window.rawQuestions = undefined;
                     const script = document.createElement('script');
+                    script.id = 'dynamic-questions-script';
                     script.textContent = e.target.result + "\n;if(typeof rawQuestions !== 'undefined'){ window.rawQuestions = rawQuestions; }";
                     document.body.appendChild(script);
 
@@ -1236,7 +1281,19 @@
                         isDataLoaded = true;
                         document.getElementById('file-count').innerText = `${window.rawQuestions.length} Questions Ready`;
                         document.getElementById('file-count').classList.remove('hidden');
+
+                        const wizFeedback = document.getElementById('wizard-upload-feedback');
+                        const wizFilename = document.getElementById('wizard-upload-filename');
+                        if (wizFeedback && wizFilename) {
+                            wizFilename.innerText = `${file.name} (${window.rawQuestions.length} Qs Loaded!)`;
+                            wizFeedback.classList.remove('hidden');
+                            wizFeedback.classList.add('inline-flex');
+                        }
+
+                        updateSetupSummaryBanner();
                         enableStartButton(`Begin Assessment (${window.rawQuestions.length} Qs)`);
+                        // Smoothly close wizard once file is successfully parsed
+                        setTimeout(() => closeOnboardingWizard(), 400);
                     } else {
                         throw new Error("Invalid format");
                     }
@@ -1252,6 +1309,11 @@
             isDataLoaded = false;
             document.getElementById('file-name').innerText = 'No file selected';
             document.getElementById('file-count').classList.add('hidden');
+            const wizFeedback = document.getElementById('wizard-upload-feedback');
+            if (wizFeedback) {
+                wizFeedback.classList.add('hidden');
+                wizFeedback.classList.remove('inline-flex');
+            }
             disableStartButton();
         }
 
