@@ -3,492 +3,731 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JRFAdda Ignition 1.0 & 2.0 — UGC NET Master Mock Engine</title>
+    <title>UGC NET Paper 1 & 2 - Master Mock Test Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: {
+                        brand: { 
                             50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe',
-                            300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6',
-                            600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a'
-                        }
+                            300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 
+                            600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' 
+                        },
+                        success: '#10b981', danger: '#ef4444', warning: '#f59e0b', marked: '#8b5cf6'
+                    },
+                    boxShadow: { 
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+                        'card': '0 4px 20px -2px rgba(0, 0, 0, 0.05)'
                     }
                 }
             }
         }
     </script>
-
+    
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: none;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         .h-dvh-screen { height: 100vh; height: 100dvh; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
-
-        .option-card { transition: all 0.15s ease; border: 2px solid #e2e8f0; }
-        .option-card:hover { border-color: #93c5fd; background-color: #f8fafc; }
-        .option-card.selected { border-color: #2563eb; background-color: #eff6ff; box-shadow: 0 3px 10px rgba(37, 99, 235, 0.1); }
-
-        .palette-btn { transition: all 0.15s ease; position: relative; }
-        .palette-btn.active { outline: 3px solid #1d4ed8; outline-offset: 2px; z-index: 10; }
-
-        /* Authentic NTA Status Colors */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .fade-in { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .option-card { transition: all 0.2s ease; border: 2px solid transparent; }
+        .option-card:hover { border-color: #dbeafe; background-color: #f8fafc; transform: translateY(-1px); }
+        .option-card.selected { border-color: #3b82f6; background-color: #eff6ff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12); }
+        
+        .palette-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+        .palette-btn:hover { transform: scale(1.05); }
+        .palette-btn.active { outline: 3px solid #2563eb; outline-offset: 2px; z-index: 10; }
+        
+        /* Authentic NTA Status Styling */
         .status-not-visited { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
         .status-not-answered { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
-        .status-answered { background: #10b981; color: #ffffff; border: 1px solid #059669; }
+        .status-answered { background: #10b981; color: #ffffff; border: 1px solid #059669; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25); }
         .status-marked { background: #ede9fe; color: #7c3aed; border: 1px solid #c4b5fd; }
         .status-answered-marked { background: #7c3aed; color: #ffffff; border: 1px solid #6d28d9; }
-        .status-answered-marked::after {
-            content: ''; position: absolute; bottom: 2px; right: 2px;
-            width: 8px; height: 8px; background: #10b981; border-radius: 50%; border: 1.5px solid white;
-        }
+        .status-answered-marked::after { content: ''; position: absolute; bottom: 3px; right: 3px; width: 8px; height: 8px; background: #10b981; border-radius: 50%; border: 1.5px solid white; }
+        
+        .progress-bar-fill { transition: width 0.4s ease-in-out; }
+        
+        .time-box { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .time-box:hover { transform: translateY(-2px); }
+        .time-box.active { background-color: #eff6ff; border-color: #2563eb; color: #1e40af; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
 
-        .time-box.active {
-            background-color: #eff6ff; border-color: #2563eb; color: #1e40af;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        .timer-circle-progress { transition: stroke-dashoffset 1s linear; transform: rotate(-90deg); transform-origin: 50% 50%; }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-12px) scale(1.04); }
         }
-        .timer-circle-progress {
-            transition: stroke-dashoffset 1s linear;
-            transform: rotate(-90deg); transform-origin: 50% 50%;
-        }
+        .animate-float { animation: floatSlow 5s ease-in-out infinite; }
+        .unit-pill-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .unit-pill-card:hover { transform: translateY(-2px); }
 
         @media print {
             .no-print { display: none !important; }
-            body, #results-view { height: auto !important; overflow: visible !important; background: white !important; }
+            body, #results-view { overflow: visible !important; height: auto !important; background: white !important; }
         }
     </style>
 </head>
 <body class="text-slate-800 antialiased selection:bg-brand-200 selection:text-brand-900">
 
-    <!-- CUSTOM MODAL -->
-    <div id="custom-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-            <div class="flex items-start gap-4">
-                <div id="modal-icon-container" class="w-11 h-11 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center shrink-0 text-lg">
-                    <i id="modal-icon" class="fa-solid fa-circle-info"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <h3 id="modal-title" class="text-base font-bold text-slate-800">Notification</h3>
-                    <p id="modal-message" class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed break-words"></p>
-                </div>
-            </div>
-            <div class="mt-5 flex justify-end gap-2.5">
-                <button id="modal-cancel-btn" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs sm:text-sm hover:bg-slate-50 hidden">Cancel</button>
-                <button id="modal-confirm-btn" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs sm:text-sm shadow-md">Okay</button>
-            </div>
-        </div>
-    </div>
+    <!-- ==================== 0. COLORFUL ANIMATED ONBOARDING WIZARD POPUP ==================== -->
+    <div id="onboarding-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300">
+        <div class="absolute top-10 left-10 w-64 h-64 bg-fuchsia-500/30 rounded-full blur-3xl animate-float pointer-events-none"></div>
+        <div class="absolute bottom-10 right-10 w-72 h-72 bg-cyan-500/30 rounded-full blur-3xl animate-float pointer-events-none" style="animation-delay: 1.5s;"></div>
 
-    <!-- ==================== 1. SETUP VIEW (MOBILE & DESKTOP OPTIMIZED) ==================== -->
-    <div id="setup-view" class="min-h-screen w-full flex flex-col lg:justify-center bg-slate-100 p-0 sm:p-4 lg:p-6">
-        <div class="bg-white sm:rounded-3xl shadow-xl border border-slate-200/80 flex flex-col lg:flex-row overflow-hidden max-w-6xl w-full mx-auto min-h-screen sm:min-h-0">
+        <div class="relative w-full max-w-4xl bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 overflow-hidden z-10 fade-in flex flex-col max-h-[92dvh]">
+            
+            <!-- Top Rainbow Gradient Progress Bar -->
+            <div class="h-2 w-full bg-slate-100 shrink-0">
+                <div id="wizard-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-500" style="width: 25%"></div>
+            </div>
 
-            <!-- Left / Top Compact Banner -->
-            <div class="lg:w-4/12 bg-gradient-to-br from-slate-900 via-brand-900 to-slate-900 p-5 sm:p-8 text-white flex flex-col justify-between relative overflow-hidden shrink-0">
-                <div class="relative z-10">
-                    <div class="flex items-center justify-between lg:justify-start gap-2 mb-3 sm:mb-5">
-                        <span class="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase text-brand-200 border border-white/10">
-                            <i class="fa-solid fa-bolt text-amber-400"></i> JRFAdda Ignition Hub
-                        </span>
-                        <span class="text-[11px] font-semibold text-brand-200 lg:hidden">Target: Dec 2026</span>
+            <!-- Wizard Header -->
+            <div class="px-5 sm:px-8 pt-5 pb-3.5 border-b border-slate-100 flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sm sm:text-base"></i>
                     </div>
-                    <h1 class="text-xl sm:text-3xl font-extrabold leading-tight tracking-tight">UGC NET CS & Paper 1 <span class="text-brand-400 block sm:inline">Mock Portal</span></h1>
-                    <p class="text-slate-300 text-xs sm:text-sm mt-1.5 sm:mt-3 leading-relaxed hidden sm:block">
-                        Select Ignition 2.0, Ignition 1.0, or Paper 1 to load topic-wise `.js` question sets directly from your GitHub repository.
-                    </p>
+                    <div class="min-w-0">
+                        <span id="wizard-step-badge" class="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full">Step 1 of 4 • Aspirant Identity</span>
+                        <h2 id="wizard-title" class="text-base sm:text-2xl font-black text-slate-800 tracking-tight truncate">Who is attempting this test today?</h2>
+                    </div>
                 </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button id="wizard-back-btn" type="button" onclick="wizardPrevStep()" class="hidden px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs items-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-arrow-left"></i> Back
+                    </button>
+                    <button type="button" onclick="closeOnboardingWizard()" title="Close Wizard" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
 
-                <!-- Built-in Ready File Quick Launch -->
-                <div class="relative z-10 mt-4 lg:my-6 bg-white/10 backdrop-blur-md p-3.5 rounded-2xl border border-white/15">
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="min-w-0">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-300 block">Built-In Ready Demo</span>
-                            <div class="text-xs sm:text-sm font-bold text-white truncate">1. OS Basics by Aditi Ma'am (25 Qs)</div>
-                        </div>
-                        <button onclick="loadBuiltinOSBasics()" class="shrink-0 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition-all active:scale-95">
-                            Load Now
+            <!-- Wizard Body Container -->
+            <div class="p-5 sm:p-8 overflow-y-auto flex-1">
+                
+                <!-- STEP 1: CHOOSE ASPIRANT -->
+                <div id="wizard-step-1" class="space-y-5">
+                    <p class="text-xs sm:text-sm text-slate-500 font-medium text-center max-w-lg mx-auto">Select your profile below to personalize your exam dashboard, candidate badge, and performance analytics.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-2xl mx-auto">
+                        <!-- Future JRF Tushar Card -->
+                        <button type="button" onclick="selectWizardCandidate('Future JRF Tushar', 'FT', 'indigo')" class="group relative rounded-3xl p-5 sm:p-6 text-left bg-gradient-to-br from-indigo-50 via-blue-50 to-white border-2 border-indigo-200 hover:border-indigo-500 shadow-sm hover:shadow-xl transition-all duration-300">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white font-black text-xl sm:text-2xl flex items-center justify-center shadow-lg shrink-0">
+                                    FT
+                                </div>
+                                <div>
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 mb-1">
+                                        <i class="fa-solid fa-award text-amber-500"></i> Target JRF Dec 2026
+                                    </span>
+                                    <h3 class="text-lg sm:text-xl font-black text-slate-800 group-hover:text-indigo-700">Future JRF Tushar</h3>
+                                    <p class="text-xs text-slate-500 font-medium mt-0.5">Computer Science & Paper 1 Aspirant</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-indigo-100 flex items-center justify-between text-xs font-bold text-indigo-600">
+                                <span>Continue as Future JRF Tushar</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </div>
+                        </button>
+
+                        <!-- Future JRF Archana Card -->
+                        <button type="button" onclick="selectWizardCandidate('Future JRF Archana', 'FA', 'rose')" class="group relative rounded-3xl p-5 sm:p-6 text-left bg-gradient-to-br from-rose-50 via-fuchsia-50 to-white border-2 border-rose-200 hover:border-rose-500 shadow-sm hover:shadow-xl transition-all duration-300">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-rose-500 via-pink-500 to-purple-600 text-white font-black text-xl sm:text-2xl flex items-center justify-center shadow-lg shrink-0">
+                                    FA
+                                </div>
+                                <div>
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 mb-1">
+                                        <i class="fa-solid fa-award text-amber-500"></i> Target JRF Dec 2026
+                                    </span>
+                                    <h3 class="text-lg sm:text-xl font-black text-slate-800 group-hover:text-rose-700">Future JRF Archana</h3>
+                                    <p class="text-xs text-slate-500 font-medium mt-0.5">Computer Science & Paper 1 Aspirant</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-rose-100 flex items-center justify-between text-xs font-bold text-rose-600">
+                                <span>Continue as Future JRF Archana</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </div>
                         </button>
                     </div>
                 </div>
 
-                <div class="relative z-10 hidden lg:flex items-center justify-between text-xs text-slate-400 border-t border-white/10 pt-4">
-                    <span>50/50 Laptop & Mobile Engine</span>
-                    <span class="font-bold text-brand-300">GitHub Pages Ready</span>
+                <!-- STEP 2: CHOOSE IGNITION BATCH OR PAPER 1 -->
+                <div id="wizard-step-2" class="hidden space-y-5">
+                    <div class="text-center max-w-lg mx-auto">
+                        <span id="wizard-greeting-pill" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-extrabold mb-1.5">
+                            <i class="fa-solid fa-user-graduate"></i> Welcome, Future JRF Tushar
+                        </span>
+                        <p class="text-xs sm:text-sm text-slate-500 font-medium">Select which JRFAdda Batch or Paper you want to practice right now:</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
+                        <!-- Ignition Batch 2.0 -->
+                        <button type="button" onclick="selectWizardBatch('ignition-2.0')" class="group rounded-3xl p-5 text-left bg-gradient-to-br from-teal-50 via-emerald-50/60 to-white border-2 border-teal-200 hover:border-teal-600 shadow-sm hover:shadow-lg transition-all">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-600 to-emerald-500 text-white flex items-center justify-center text-xl shadow-md">
+                                    <i class="fa-solid fa-fire"></i>
+                                </div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-teal-100 text-teal-800">Paper 2 • CS</span>
+                            </div>
+                            <h3 class="text-xl font-black text-slate-800">Ignition Batch 2.0</h3>
+                            <p class="text-xs text-slate-600 font-medium mt-1">11 CS Subjects • 52 PYQ Sessions by Aditi Ma'am</p>
+                            <div class="mt-4 pt-2.5 border-t border-teal-100 flex items-center justify-between text-xs font-extrabold text-teal-700">
+                                <span>Select Ignition 2.0</span>
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </div>
+                        </button>
+
+                        <!-- Ignition Batch 1.0 -->
+                        <button type="button" onclick="selectWizardBatch('ignition-1.0')" class="group rounded-3xl p-5 text-left bg-gradient-to-br from-purple-50 via-fuchsia-50/60 to-white border-2 border-purple-200 hover:border-purple-600 shadow-sm hover:shadow-lg transition-all">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-fuchsia-500 text-white flex items-center justify-center text-xl shadow-md">
+                                    <i class="fa-solid fa-rocket"></i>
+                                </div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-purple-100 text-purple-800">Paper 2 • CS</span>
+                            </div>
+                            <h3 class="text-xl font-black text-slate-800">Ignition Batch 1.0</h3>
+                            <p class="text-xs text-slate-600 font-medium mt-1">12 CS Subjects • 71 Topic-wise PYQ Sessions</p>
+                            <div class="mt-4 pt-2.5 border-t border-purple-100 flex items-center justify-between text-xs font-extrabold text-purple-700">
+                                <span>Select Ignition 1.0</span>
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </div>
+                        </button>
+
+                        <!-- UGC NET Paper 1 -->
+                        <button type="button" onclick="selectWizardBatch('paper-1')" class="group rounded-3xl p-5 text-left bg-gradient-to-br from-blue-50 via-indigo-50/60 to-white border-2 border-blue-200 hover:border-blue-600 shadow-sm hover:shadow-lg transition-all">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center text-xl shadow-md">
+                                    <i class="fa-solid fa-book-open-reader"></i>
+                                </div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-100 text-blue-800">Code 00 • Paper 1</span>
+                            </div>
+                            <h3 class="text-xl font-black text-slate-800">UGC NET Paper 1</h3>
+                            <p class="text-xs text-slate-600 font-medium mt-1">All 10 General Units (Teaching, Research, ICT, Maths, PDE)</p>
+                            <div class="mt-4 pt-2.5 border-t border-blue-100 flex items-center justify-between text-xs font-extrabold text-blue-700">
+                                <span>Select Paper 1</span>
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </div>
+                        </button>
+
+                        <!-- Upload Custom Local .JS File -->
+                        <button type="button" onclick="selectWizardBatch('custom')" class="group rounded-3xl p-5 text-left bg-gradient-to-br from-amber-50 via-orange-50/60 to-white border-2 border-amber-200 hover:border-amber-600 shadow-sm hover:shadow-lg transition-all">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center text-xl shadow-md">
+                                    <i class="fa-solid fa-file-code"></i>
+                                </div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">Device Storage</span>
+                            </div>
+                            <h3 class="text-xl font-black text-slate-800">Upload Local .JS File</h3>
+                            <p class="text-xs text-slate-600 font-medium mt-1">Browse & load any custom .js file directly from your phone/laptop</p>
+                            <div class="mt-4 pt-2.5 border-t border-amber-100 flex items-center justify-between text-xs font-extrabold text-amber-700">
+                                <span>Upload From Device</span>
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: CHOOSE SUBJECT / UNIT -->
+                <div id="wizard-step-3" class="hidden space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-1">
+                        <p class="text-xs sm:text-sm text-slate-500 font-semibold">Click on the Subject / Unit you want to practice:</p>
+                        <span id="wizard-selected-batch-pill" class="text-xs font-extrabold px-3 py-1 rounded-full bg-teal-100 text-teal-800">Ignition 2.0</span>
+                    </div>
+                    <div id="wizard-subjects-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                </div>
+
+                <!-- STEP 4: CHOOSE SPECIFIC TOPIC (.JS FILE) -->
+                <div id="wizard-step-4" class="hidden space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-1">
+                        <p class="text-xs sm:text-sm text-slate-500 font-semibold">Select the Topic (.js Question Bank) to load from GitHub:</p>
+                        <span id="wizard-selected-subject-pill" class="text-xs font-extrabold px-3 py-1 rounded-full bg-indigo-100 text-indigo-800">Operating System</span>
+                    </div>
+                    <div id="wizard-topics-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Notification & Confirmation Modal -->
+    <div id="custom-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+            <div class="flex items-start gap-4">
+                <div id="modal-icon-container" class="w-12 h-12 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center shrink-0 text-xl">
+                    <i id="modal-icon" class="fa-solid fa-circle-info"></i>
+                </div>
+                <div class="flex-grow min-w-0">
+                    <h3 id="modal-title" class="text-lg font-bold text-slate-800">Notification</h3>
+                    <p id="modal-message" class="text-sm text-slate-600 mt-1 leading-relaxed break-words"></p>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="modal-cancel-btn" type="button" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 hidden">Cancel</button>
+                <button id="modal-confirm-btn" type="button" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md">Okay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 1. SETUP VIEW ==================== -->
+    <div id="setup-view" class="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50/40 p-2 sm:p-4 md:p-6 fade-in">
+        <div class="bg-white rounded-3xl shadow-glass border border-white flex flex-col lg:flex-row overflow-hidden max-w-6xl w-full">
+            
+            <!-- Left Branding Sidebar -->
+            <div class="lg:w-4/12 bg-gradient-to-br from-brand-700 via-brand-800 to-slate-900 p-6 md:p-9 text-white flex flex-col justify-between relative overflow-hidden">
+                <div class="relative z-10">
+                    <div class="inline-flex items-center gap-2 bg-white/15 px-3 py-1.5 rounded-xl mb-4 backdrop-blur-md border border-white/10">
+                        <i class="fa-solid fa-graduation-cap text-brand-200"></i>
+                        <span class="text-xs font-bold tracking-wider uppercase text-brand-100">JRFAdda Ignition CBT</span>
+                    </div>
+                    <h1 class="text-2xl md:text-4xl font-extrabold mb-2 leading-tight tracking-tight">UGC NET / JRF <br><span class="text-brand-300">Paper 1 & CS</span></h1>
+                    <p class="text-brand-100 text-xs md:text-sm opacity-90 leading-relaxed">Direct GitHub Repository Loader for Ignition 1.0, Ignition 2.0, and Paper 1 PYQ Mock Tests.</p>
+                </div>
+                
+                <!-- Quick Ready Built-in OS Basics Card -->
+                <div class="relative z-10 my-5 bg-white/10 p-4 rounded-2xl border border-white/15 backdrop-blur-md">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300 block mb-1">Instant Built-In Test</span>
+                    <div class="text-sm font-bold text-white mb-2.5">1. OS Basics by Aditi Ma'am (25 Qs)</div>
+                    <button type="button" onclick="loadBuiltinOSBasics()" class="w-full py-2 px-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-bolt"></i> Load 25 OS Questions Now
+                    </button>
+                </div>
+
+                <div class="relative z-10 text-xs text-brand-200/70 flex items-center justify-between border-t border-white/10 pt-3">
+                    <span>Laptop & Smartphone Optimized</span>
+                    <span class="font-semibold text-brand-200">v3.0 Pro</span>
                 </div>
             </div>
 
             <!-- Right Configuration Panel -->
-            <div class="lg:w-8/12 p-4 sm:p-8 flex flex-col justify-between bg-white flex-1">
-                <div class="space-y-5">
-
-                    <!-- STEP 1: SELECT BATCH -->
-                    <div>
-                        <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">1. Select Batch / Mode</label>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="batch-tabs">
-                            <button type="button" onclick="selectBatch('ignition-2.0')" data-batch="ignition-2.0" class="batch-tab py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-brand-600 bg-brand-50 text-brand-700 flex items-center justify-center gap-1.5 transition-all">
-                                <i class="fa-solid fa-fire text-teal-500"></i> Ignition 2.0
-                            </button>
-                            <button type="button" onclick="selectBatch('ignition-1.0')" data-batch="ignition-1.0" class="batch-tab py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition-all">
-                                <i class="fa-solid fa-rocket text-purple-500"></i> Ignition 1.0
-                            </button>
-                            <button type="button" onclick="selectBatch('paper-1')" data-batch="paper-1" class="batch-tab py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition-all">
-                                <i class="fa-solid fa-book-open text-blue-500"></i> Paper 1
-                            </button>
-                            <button type="button" onclick="selectBatch('custom')" data-batch="custom" class="batch-tab py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition-all">
-                                <i class="fa-solid fa-folder-open text-amber-500"></i> Local .JS
-                            </button>
+            <div class="lg:w-8/12 p-5 sm:p-8 md:p-10 flex flex-col justify-between bg-white">
+                <div>
+                    <!-- Active Profile & Selection Banner -->
+                    <div class="mb-5 p-3.5 rounded-2xl bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-100 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div id="setup-candidate-avatar" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center shadow-sm shrink-0">
+                                FT
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 bg-white px-2 py-0.5 rounded border border-indigo-100">Active Candidate</span>
+                                    <span id="setup-candidate-name" class="text-sm font-black text-slate-800 truncate">Future JRF Tushar</span>
+                                </div>
+                                <p id="setup-selection-summary" class="text-xs text-slate-600 font-semibold mt-0.5 truncate">Ignition 2.0 • Operating System</p>
+                            </div>
                         </div>
+                        <button type="button" onclick="openOnboardingWizard()" class="text-xs font-bold text-indigo-700 bg-white hover:bg-indigo-50 border border-indigo-200 px-3 py-2 rounded-xl shadow-sm transition-all flex items-center gap-1.5 shrink-0">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Launch Wizard
+                        </button>
                     </div>
 
-                    <!-- STEP 2: SUBJECT & TOPIC (.JS) SELECTOR (FOR GITHUB REPO) -->
-                    <div id="repo-selector-box" class="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                            <!-- Subject Dropdown -->
-                            <div>
-                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">2. Select Subject / Unit</label>
-                                <div class="relative">
-                                    <select id="subject-select" onchange="handleSubjectChange()" class="w-full appearance-none bg-white border border-slate-300 text-slate-800 font-bold text-xs sm:text-sm py-3 px-3.5 pr-9 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
-                                    </select>
-                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-                                </div>
-                            </div>
-
-                            <!-- Topic (.js file) Dropdown -->
-                            <div>
-                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">3. Select Topic (.js File)</label>
-                                <div class="relative">
-                                    <select id="topic-select" onchange="handleTopicChange()" class="w-full appearance-none bg-white border border-slate-300 text-slate-800 font-bold text-xs sm:text-sm py-3 px-3.5 pr-9 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
-                                    </select>
-                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Repo File Path & Status Bar -->
-                        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200/70 text-xs">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <span class="px-2 py-0.5 bg-slate-200 text-slate-700 rounded font-mono text-[10px] truncate max-w-[230px] sm:max-w-md" id="expected-path-badge">questions/...</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span id="repo-load-status" class="font-bold text-slate-500 text-xs">Checking file...</span>
-                                <button type="button" onclick="fetchSelectedTopicJS()" class="text-xs font-bold text-brand-600 hover:underline flex items-center gap-1">
-                                    <i class="fa-solid fa-rotate"></i> Reload
+                    <div class="space-y-5">
+                        <!-- STEP 1: BATCH SELECTOR TABS -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">1. Select Batch / Mode</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <button type="button" id="batch-btn-ignition-2.0" onclick="selectBatch('ignition-2.0')" class="py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 transition-all flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-fire text-teal-500"></i> Ignition 2.0
+                                </button>
+                                <button type="button" id="batch-btn-ignition-1.0" onclick="selectBatch('ignition-1.0')" class="py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 transition-all flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-rocket text-purple-500"></i> Ignition 1.0
+                                </button>
+                                <button type="button" id="batch-btn-paper-1" onclick="selectBatch('paper-1')" class="py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 transition-all flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-book-open text-blue-500"></i> Paper 1
+                                </button>
+                                <button type="button" id="batch-btn-custom" onclick="selectBatch('custom')" class="py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 transition-all flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-folder-open text-amber-500"></i> Local .JS
                                 </button>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- ALTERNATIVE STEP 2: MANUAL LOCAL FILE UPLOAD (IF 'LOCAL .JS' TAB SELECTED) -->
-                    <div id="custom-upload-box" class="hidden p-4 bg-brand-50/60 rounded-2xl border border-brand-200 flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-brand-900 mb-0.5">Upload Custom Question File (.js)</label>
-                            <p class="text-xs text-slate-500">Pick any <code class="bg-white px-1 py-0.5 rounded border">rawQuestions</code> file stored on your phone or laptop</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <label for="file-upload" class="cursor-pointer bg-white hover:bg-brand-50 border-2 border-brand-500 text-brand-700 font-bold py-2 px-4 rounded-xl text-xs sm:text-sm shrink-0 shadow-sm">
-                                <i class="fa-solid fa-file-import mr-1"></i> Browse .js
-                            </label>
-                            <input id="file-upload" type="file" accept=".js" class="hidden" onchange="handleLocalFileUpload(event)">
-                            <span id="local-file-status" class="text-xs font-bold text-slate-600 truncate max-w-[140px]">No file</span>
-                        </div>
-                    </div>
+                        <!-- STEP 2: GITHUB REPOSITORY SUBJECT & TOPIC (.JS) SELECTOR -->
+                        <div id="repo-selector-container" class="p-4 bg-slate-50 rounded-2xl border border-slate-200/90 space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">2. Select Subject / Unit</label>
+                                    <div class="relative">
+                                        <select id="setting-subject" onchange="handleSubjectChange()" class="w-full appearance-none bg-white border border-slate-300 text-slate-800 font-bold text-xs sm:text-sm py-3 px-3.5 pr-9 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"></select>
+                                        <i class="fa-solid fa-chevron-down text-xs text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">3. Select Topic (.js File)</label>
+                                    <div class="relative">
+                                        <select id="setting-topic" onchange="handleTopicChange()" class="w-full appearance-none bg-white border border-slate-300 text-slate-800 font-bold text-xs sm:text-sm py-3 px-3.5 pr-9 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"></select>
+                                        <i class="fa-solid fa-chevron-down text-xs text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <!-- STEP 3: TIME ALLOCATION BOXES -->
-                    <div>
-                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                            <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400">4. Time Control (Per Question)</label>
-                            <div class="inline-flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-[11px]">
-                                <button type="button" id="mode-overall-btn" onclick="setTimerMode('overall')" class="px-2.5 py-1 rounded-md font-bold bg-white text-brand-700 shadow-sm">Overall Timer</button>
-                                <button type="button" id="mode-perq-btn" onclick="setTimerMode('per-question')" class="px-2.5 py-1 rounded-md font-semibold text-slate-600">Strict Per-Q</button>
+                            <div class="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-200/80 text-xs">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="text-[11px] font-bold text-slate-400">Path:</span>
+                                    <code id="repo-file-path" class="bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-700 font-mono text-[11px] truncate max-w-[220px] sm:max-w-md">questions/...</code>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span id="repo-file-status" class="font-extrabold text-emerald-600">Checking...</span>
+                                    <button type="button" onclick="fetchSelectedTopicJS()" class="text-brand-600 hover:text-brand-800 font-bold flex items-center gap-1">
+                                        <i class="fa-solid fa-rotate"></i> Reload
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2" id="time-boxes-container">
-                            <button type="button" onclick="selectTimeBox(0)" data-time="0" class="time-box py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center">
-                                <i class="fa-solid fa-infinity text-sm text-emerald-600 mb-0.5"></i>
-                                <span class="text-xs font-extrabold">No Limit</span>
-                                <span class="text-[9px] text-slate-400">Practice</span>
-                            </button>
-                            <button type="button" onclick="selectTimeBox(30)" data-time="30" class="time-box py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center">
-                                <span class="text-base font-black">30s</span>
-                                <span class="text-[9px] text-slate-500 font-semibold">Rapid</span>
-                            </button>
-                            <button type="button" onclick="selectTimeBox(45)" data-time="45" class="time-box py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center">
-                                <span class="text-base font-black">45s</span>
-                                <span class="text-[9px] text-slate-500 font-semibold">Sprint</span>
-                            </button>
-                            <button type="button" onclick="selectTimeBox(60)" data-time="60" class="time-box active py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center">
-                                <span class="text-base font-black">60s</span>
-                                <span class="text-[9px] text-brand-600 font-bold">Standard</span>
-                            </button>
-                            <button type="button" onclick="selectTimeBox(90)" data-time="90" class="time-box py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center">
-                                <span class="text-base font-black">90s</span>
-                                <span class="text-[9px] text-slate-500 font-semibold">Numerical</span>
-                            </button>
-                            <button type="button" onclick="selectTimeBox(120)" data-time="120" class="time-box py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center">
-                                <span class="text-base font-black">120s</span>
-                                <span class="text-[9px] text-slate-500 font-semibold">DI / Deep</span>
+                        <!-- STEP 2 ALT: LOCAL FILE UPLOAD -->
+                        <div id="local-upload-container" class="hidden p-4 bg-brand-50/60 rounded-2xl border border-brand-100 flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-brand-900 mb-1">Upload Custom Question Bank (.js)</label>
+                                <p class="text-xs text-slate-500">Select any <code class="bg-white px-1.5 py-0.5 rounded border border-slate-200 text-brand-700 font-mono">rawQuestions</code> file from your phone or laptop</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <label for="file-upload" class="cursor-pointer bg-white hover:bg-brand-50 border-2 border-brand-500 text-brand-700 font-bold py-2 px-4 rounded-xl transition-all flex items-center gap-2 shadow-sm text-xs sm:text-sm shrink-0">
+                                    <i class="fa-solid fa-file-import"></i> Select .js File
+                                </label>
+                                <input id="file-upload" type="file" accept=".js" class="hidden" onchange="handleFileUpload(event)">
+                                <div class="flex flex-col min-w-[120px]">
+                                    <span id="file-name" class="text-xs text-slate-500 font-semibold truncate max-w-[150px]">No file selected</span>
+                                    <span id="file-count" class="text-[11px] font-bold text-emerald-600 hidden"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 3: SQUARE TIME ALLOCATION BOXES -->
+                        <div>
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500">4. Time Allocation (Per Question)</label>
+                                <div class="inline-flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs">
+                                    <button type="button" id="mode-overall-btn" onclick="setTimerMode('overall')" class="px-2.5 py-1 rounded-md font-bold bg-white text-brand-700 shadow-sm transition-all">Overall Timer</button>
+                                    <button type="button" id="mode-perq-btn" onclick="setTimerMode('per-question')" class="px-2.5 py-1 rounded-md font-semibold text-slate-600 hover:text-slate-800 transition-all">Strict Per-Q</button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5" id="time-boxes-container">
+                                <button type="button" onclick="selectTimeBox(0)" data-time="0" class="time-box py-3 px-2 rounded-2xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center cursor-pointer">
+                                    <i class="fa-solid fa-infinity text-base mb-1 text-emerald-600"></i>
+                                    <span class="text-xs font-extrabold leading-none">No Limit</span>
+                                    <span class="text-[10px] text-slate-400 mt-1">Own Pace</span>
+                                </button>
+                                <button type="button" onclick="selectTimeBox(30)" data-time="30" class="time-box py-3 px-2 rounded-2xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center cursor-pointer">
+                                    <span class="text-lg font-black leading-none">30<span class="text-xs">s</span></span>
+                                    <span class="text-[10px] font-semibold text-slate-500 mt-1">Rapid Fire</span>
+                                </button>
+                                <button type="button" onclick="selectTimeBox(45)" data-time="45" class="time-box py-3 px-2 rounded-2xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center cursor-pointer">
+                                    <span class="text-lg font-black leading-none">45<span class="text-xs">s</span></span>
+                                    <span class="text-[10px] font-semibold text-slate-500 mt-1">Fast Pace</span>
+                                </button>
+                                <button type="button" onclick="selectTimeBox(60)" data-time="60" class="time-box active py-3 px-2 rounded-2xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center cursor-pointer">
+                                    <span class="text-lg font-black leading-none">60<span class="text-xs">s</span></span>
+                                    <span class="text-[10px] font-semibold text-brand-600 mt-1">Standard</span>
+                                </button>
+                                <button type="button" onclick="selectTimeBox(90)" data-time="90" class="time-box py-3 px-2 rounded-2xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center cursor-pointer">
+                                    <span class="text-lg font-black leading-none">90<span class="text-xs">s</span></span>
+                                    <span class="text-[10px] font-semibold text-slate-500 mt-1">Analytical</span>
+                                </button>
+                                <button type="button" onclick="selectTimeBox(120)" data-time="120" class="time-box py-3 px-2 rounded-2xl border-2 border-slate-200 bg-slate-50/70 flex flex-col items-center justify-center text-center cursor-pointer">
+                                    <span class="text-lg font-black leading-none">120<span class="text-xs">s</span></span>
+                                    <span class="text-[10px] font-semibold text-slate-500 mt-1">DI / Deep</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- STEP 4: SHUFFLE & START -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-slate-100">
+                            <label class="flex items-center gap-3 cursor-pointer select-none">
+                                <input type="checkbox" id="setting-shuffle" checked class="w-4 h-4 accent-brand-600 rounded cursor-pointer">
+                                <span class="text-sm text-slate-700 font-semibold">Shuffle Question Order</span>
+                            </label>
+
+                            <button id="start-btn" type="button" onclick="startTest()" disabled class="sm:w-auto w-full bg-brand-600 hover:bg-brand-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-brand-500/25 disabled:shadow-none transition-all active:scale-95 flex justify-center items-center gap-2.5 text-base">
+                                <span>Begin Assessment</span> <i class="fa-solid fa-arrow-right text-sm"></i>
                             </button>
                         </div>
                     </div>
-                </div>
-
-                <!-- STEP 4: SHUFFLE & LAUNCH BAR -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 mt-5 border-t border-slate-100">
-                    <label class="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input type="checkbox" id="setting-shuffle" checked class="w-4 h-4 accent-brand-600 rounded cursor-pointer">
-                        <span class="text-xs sm:text-sm text-slate-700 font-semibold">Shuffle Questions</span>
-                    </label>
-
-                    <button id="start-btn" onclick="startTest()" disabled class="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-brand-500/25 disabled:shadow-none transition-all active:scale-95 flex justify-center items-center gap-2 text-sm sm:text-base">
-                        <span>Select a Valid Question Set</span> <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ==================== 2. TEST INTERFACE VIEW (100dvh MOBILE + SPLIT LAPTOP) ==================== -->
+    <!-- ==================== 2. TEST INTERFACE VIEW ==================== -->
     <div id="test-view" class="h-dvh-screen w-full flex flex-col hidden bg-slate-100 overflow-hidden">
-
-        <!-- Compact Top Header -->
-        <header class="h-14 sm:h-16 bg-white border-b border-slate-200 px-3 sm:px-6 flex items-center justify-between shrink-0 z-30">
+        
+        <!-- Top Header -->
+        <header class="h-14 sm:h-16 bg-white border-b border-slate-200 shadow-sm flex items-center justify-between px-3 sm:px-6 shrink-0 z-30">
             <div class="flex items-center gap-2.5 min-w-0">
-                <button onclick="confirmExitToSetup()" title="Exit to Setup" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
+                <button type="button" onclick="confirmExitToSetup()" title="Back to Setup" class="bg-slate-100 hover:bg-slate-200 text-slate-700 w-9 h-9 rounded-xl flex items-center justify-center font-bold shrink-0">
                     <i class="fa-solid fa-arrow-left text-xs sm:text-sm"></i>
                 </button>
                 <div class="truncate">
                     <div class="flex items-center gap-1.5">
-                        <span id="header-batch-badge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-brand-100 text-brand-700 shrink-0">Ignition 2.0</span>
-                        <h1 id="header-unit-title" class="font-bold text-slate-800 text-xs sm:text-sm truncate">Operating System</h1>
+                        <span id="header-paper-badge" class="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-brand-100 text-brand-700 shrink-0">Ignition 2.0</span>
+                        <h1 id="header-unit-title" class="font-bold text-slate-800 text-xs sm:text-base truncate">Operating System</h1>
                     </div>
                     <p id="test-title-header" class="text-[11px] text-slate-500 font-medium truncate">1. OS Basics by Aditi Ma'am</p>
                 </div>
             </div>
-
+            
+            <!-- TOP-RIGHT CORNER: Candidate Info + Timer + Mobile Palette Toggle + Submit -->
             <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-                <!-- Timer Pill -->
-                <div id="timer-badge-container" class="flex items-center gap-1.5 bg-red-50 text-red-600 px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-red-200 font-mono font-bold text-xs sm:text-base">
-                    <i id="timer-icon" class="fa-regular fa-clock animate-pulse text-xs"></i>
+                <div class="hidden xl:flex items-center gap-2.5 bg-slate-50 border border-slate-200/90 px-3.5 py-1.5 rounded-xl">
+                    <div id="top-right-avatar" class="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                        FT
+                    </div>
+                    <div class="text-left leading-tight">
+                        <div id="top-right-candidate" class="text-xs font-extrabold text-slate-800">Future JRF Tushar</div>
+                        <div id="top-right-paper-unit" class="text-[11px] font-bold text-brand-600 truncate max-w-[240px]">Ignition 2.0 • OS</div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Clock -->
+                <div id="timer-badge-container" class="flex items-center gap-1.5 bg-red-50 text-red-600 px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-red-100 font-mono font-bold text-xs sm:text-base shadow-sm">
+                    <i id="timer-icon" class="fa-regular fa-clock animate-pulse"></i>
                     <span id="time-text">00:00:00</span>
                 </div>
 
-                <!-- Mobile Palette Drawer Trigger Button -->
-                <button onclick="toggleMobilePalette()" class="lg:hidden flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-3 py-2 rounded-xl border border-slate-300">
+                <!-- Smartphone Palette Button -->
+                <button type="button" onclick="toggleMobilePalette()" class="lg:hidden flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-3 py-2 rounded-xl border border-slate-300">
                     <i class="fa-solid fa-grip text-brand-600"></i>
-                    <span id="mobile-palette-counter">0/25</span>
+                    <span id="mobile-palette-btn-text">0/25</span>
                 </button>
-
-                <!-- Desktop Submit Button -->
-                <button onclick="confirmSubmit()" class="hidden sm:flex bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm items-center gap-1.5 text-xs sm:text-sm">
-                    <i class="fa-solid fa-paper-plane text-xs"></i> <span>Submit</span>
+                
+                <button type="button" onclick="confirmSubmit()" class="hidden sm:flex bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 md:px-5 rounded-xl shadow-md transition-all items-center gap-2 text-xs sm:text-sm">
+                    <i class="fa-solid fa-paper-plane text-xs"></i> <span>Submit Test</span>
                 </button>
             </div>
         </header>
 
         <!-- Main Workspace -->
         <main class="flex-1 flex flex-col lg:flex-row gap-0 lg:gap-4 lg:p-4 overflow-hidden max-w-[1920px] mx-auto w-full relative">
-
-            <!-- LEFT: Question Area + Sticky Bottom Controls -->
-            <div class="w-full lg:w-8/12 xl:w-9/12 bg-white lg:rounded-2xl lg:shadow-sm lg:border border-slate-200 flex flex-col overflow-hidden flex-1">
-
-                <!-- Question Bar -->
-                <div class="bg-slate-50 border-b border-slate-200 px-4 sm:px-6 py-2.5 sm:py-3 flex justify-between items-center shrink-0">
-                    <div class="flex items-center gap-2">
-                        <span class="bg-brand-600 text-white text-xs sm:text-sm font-extrabold px-3 py-1 rounded-lg" id="q-number-badge">Q 1 / 25</span>
-                        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">+2 Marks</span>
+            
+            <!-- LEFT COLUMN: Question & Action Bar -->
+            <div class="w-full lg:w-8/12 xl:w-9/12 bg-white lg:rounded-2xl lg:shadow-sm lg:border border-slate-200 flex flex-col overflow-hidden relative flex-1">
+                
+                <!-- Question Sub-header -->
+                <div class="bg-slate-50 border-b border-slate-200 px-4 sm:px-8 py-3 flex justify-between items-center shrink-0">
+                    <div class="flex items-center gap-2.5">
+                        <span class="bg-brand-600 text-white text-xs sm:text-sm font-extrabold px-3 py-1 rounded-lg shadow-sm" id="q-number-badge">Question 1 of 25</span>
+                        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                            +2 Marks
+                        </span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div id="q-timer-indicator" class="text-red-600 font-bold text-xs bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full hidden"></div>
-                        <button onclick="confirmSubmit()" class="sm:hidden text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
-                            Submit Test
+                        <div id="q-timer-indicator" class="text-danger font-bold text-xs bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full hidden"></div>
+                        <button type="button" onclick="confirmSubmit()" class="sm:hidden bg-emerald-600 text-white font-bold text-xs px-3 py-1 rounded-lg">
+                            Submit
                         </button>
                     </div>
                 </div>
 
-                <!-- Scrollable Question & Options -->
-                <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8" id="q-scroll-area">
-                    <div class="max-w-4xl mx-auto pb-4">
+                <!-- Scrollable Question Content -->
+                <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 relative" id="q-scroll-area">
+                    <div class="max-w-4xl mx-auto">
                         <div id="q-text" class="text-base sm:text-lg md:text-xl text-slate-800 leading-relaxed font-semibold mb-6 select-text"></div>
                         <div id="options-container" class="space-y-3"></div>
                     </div>
                 </div>
 
-                <!-- Thumb-Friendly Bottom Action Bar -->
-                <div class="bg-white sm:bg-slate-50 border-t border-slate-200 px-3 py-2.5 sm:px-6 sm:py-3 shrink-0 grid grid-cols-4 sm:flex sm:flex-wrap items-center justify-between gap-2">
-                    <button onclick="goPrev()" id="prev-btn" class="col-span-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold py-2.5 px-2 sm:px-4 rounded-xl flex items-center justify-center gap-1.5 text-xs sm:text-sm disabled:opacity-40">
+                <!-- Bottom Navigation Bar (Thumb Friendly on Smartphone) -->
+                <div class="bg-slate-50 border-t border-slate-200 p-3 sm:px-8 shrink-0 grid grid-cols-4 sm:flex sm:flex-wrap justify-between items-center gap-2">
+                    <button type="button" onclick="goPrev()" id="prev-btn" class="col-span-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold py-2.5 px-2 sm:px-4 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs sm:text-sm disabled:opacity-40">
                         <i class="fa-solid fa-angle-left"></i> <span>Prev</span>
                     </button>
-
-                    <button onclick="markAndNext()" class="col-span-1 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold py-2.5 px-2 sm:px-4 rounded-xl flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                    <button type="button" onclick="markAndNext()" class="col-span-1 bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200 font-semibold py-2.5 px-2 sm:px-4 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs sm:text-sm">
                         <i class="fa-regular fa-bookmark"></i> <span class="hidden md:inline">Mark for Review</span><span class="md:hidden">Review</span>
                     </button>
-
-                    <button onclick="clearResponse()" class="col-span-1 bg-white hover:bg-slate-100 text-slate-600 border border-slate-300 font-bold py-2.5 px-2 sm:px-4 rounded-xl flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                    <button type="button" onclick="clearResponse()" class="col-span-1 bg-white hover:bg-slate-100 text-slate-600 border border-slate-300 font-semibold py-2.5 px-2 sm:px-4 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs sm:text-sm">
                         <i class="fa-solid fa-eraser"></i> <span>Clear</span>
                     </button>
-
-                    <button id="primary-next-btn" onclick="handlePrimaryAction()" class="col-span-1 sm:ml-auto bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 px-3 sm:px-7 rounded-xl shadow-md flex items-center justify-center gap-1.5 text-xs sm:text-sm">
-                        <span>Next</span> <i class="fa-solid fa-angle-right"></i>
+                    <button type="button" id="primary-next-btn" onclick="handlePrimaryAction()" class="col-span-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 px-3 sm:px-8 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 text-xs sm:text-base sm:ml-auto">
+                        <span>Save & Next</span> <i class="fa-solid fa-angle-right"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Mobile Backdrop for Palette Drawer -->
-            <div id="palette-backdrop" onclick="toggleMobilePalette()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 hidden lg:hidden"></div>
+            <!-- Mobile Backdrop for Slide-Up Palette -->
+            <div id="palette-backdrop" onclick="toggleMobilePalette(false)" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 hidden lg:hidden"></div>
 
-            <!-- RIGHT: Question Palette (Desktop Sidebar + Mobile Slide-Up Bottom Drawer) -->
-            <aside id="palette-drawer" class="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl lg:rounded-2xl shadow-2xl lg:shadow-sm border border-slate-200 flex flex-col overflow-hidden transition-transform duration-300 translate-y-full lg:translate-y-0 lg:static lg:w-4/12 xl:w-3/12 max-h-[80dvh] lg:max-h-none">
-
-                <!-- Drawer Header -->
-                <div class="p-3.5 sm:p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-full bg-brand-600 text-white font-extrabold text-xs flex items-center justify-center">JRF</div>
-                        <div>
-                            <div class="font-bold text-slate-800 text-xs sm:text-sm">Question Palette</div>
-                            <div id="side-progress-text" class="text-[11px] font-bold text-emerald-600">0/25 Answered</div>
+            <!-- RIGHT COLUMN: Question Palette (Desktop Sidebar & Mobile Slide-Up Drawer) -->
+            <div id="palette-drawer" class="fixed inset-x-0 bottom-0 z-50 w-full lg:static lg:w-4/12 xl:w-3/12 bg-white rounded-t-3xl lg:rounded-2xl shadow-2xl lg:shadow-sm border border-slate-200 flex flex-col overflow-hidden shrink-0 max-h-[80dvh] lg:max-h-none transition-transform duration-300 translate-y-full lg:translate-y-0">
+                
+                <!-- Candidate Info & Target Unit Header -->
+                <div class="p-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-indigo-50/40 shrink-0">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div id="sidebar-candidate-avatar" class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center shadow-sm shrink-0">
+                                FT
+                            </div>
+                            <div class="min-w-0">
+                                <div id="candidate-name-label" class="font-black text-slate-800 text-sm truncate">Future JRF Tushar</div>
+                                <div id="candidate-paper-label" class="text-xs text-brand-700 font-bold truncate">Ignition 2.0</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="side-progress-text" class="text-xs font-extrabold text-emerald-700 bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-lg shrink-0">0/0</span>
+                            <button type="button" onclick="toggleMobilePalette(false)" class="lg:hidden w-8 h-8 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
                         </div>
                     </div>
-                    <button onclick="toggleMobilePalette()" class="lg:hidden w-8 h-8 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
+                    <div class="mt-2.5 pt-2 border-t border-slate-200/80 flex items-center justify-between gap-2 text-xs">
+                        <span class="font-bold text-slate-500 shrink-0"><i class="fa-solid fa-microchip text-brand-500 mr-1"></i>Topic:</span>
+                        <span id="sidebar-unit-badge" class="font-extrabold text-slate-800 bg-white px-2.5 py-0.5 rounded-lg border border-slate-200 truncate">OS Basics</span>
+                    </div>
                 </div>
 
-                <!-- Status Legend -->
-                <div class="p-3 border-b border-slate-200 bg-white grid grid-cols-2 gap-2 text-[11px] font-semibold text-slate-600 shrink-0">
-                    <div class="flex items-center gap-1.5"><div id="count-answered" class="w-5 h-5 rounded status-answered flex items-center justify-center text-[10px] font-bold">0</div><span>Answered</span></div>
-                    <div class="flex items-center gap-1.5"><div id="count-not-answered" class="w-5 h-5 rounded status-not-answered flex items-center justify-center text-[10px] font-bold">0</div><span>Not Answered</span></div>
-                    <div class="flex items-center gap-1.5"><div id="count-not-visited" class="w-5 h-5 rounded status-not-visited flex items-center justify-center text-[10px] font-bold">0</div><span>Not Visited</span></div>
-                    <div class="flex items-center gap-1.5"><div id="count-marked" class="w-5 h-5 rounded status-marked flex items-center justify-center text-[10px] font-bold">0</div><span>Marked</span></div>
-                    <div class="col-span-2 flex items-center gap-1.5"><div id="count-answered-marked" class="w-5 h-5 rounded status-answered-marked flex items-center justify-center text-[10px] font-bold">0</div><span>Answered & Marked for Review</span></div>
+                <!-- Live Count Status Legend -->
+                <div class="p-3 border-b border-slate-200 shrink-0 bg-white grid grid-cols-2 gap-y-2 gap-x-2 text-xs font-semibold text-slate-600">
+                    <div class="flex items-center gap-2"><div id="count-answered" class="w-5 h-5 rounded-md status-answered flex items-center justify-center text-[11px] font-bold">0</div><span>Answered</span></div>
+                    <div class="flex items-center gap-2"><div id="count-not-answered" class="w-5 h-5 rounded-md status-not-answered flex items-center justify-center text-[11px] font-bold">0</div><span>Not Answered</span></div>
+                    <div class="flex items-center gap-2"><div id="count-not-visited" class="w-5 h-5 rounded-md status-not-visited flex items-center justify-center text-[11px] font-bold">0</div><span>Not Visited</span></div>
+                    <div class="flex items-center gap-2"><div id="count-marked" class="w-5 h-5 rounded-md status-marked flex items-center justify-center text-[11px] font-bold">0</div><span>Marked</span></div>
+                    <div class="col-span-2 flex items-center gap-2"><div id="count-answered-marked" class="w-5 h-5 rounded-md status-answered-marked flex items-center justify-center text-[11px] font-bold">0</div><span>Answered & Marked for Review</span></div>
                 </div>
 
-                <!-- Scrollable Grid -->
-                <div class="flex-1 overflow-y-auto p-4 bg-white">
+                <!-- Progress Bar -->
+                <div class="px-4 py-2 bg-slate-50 border-b border-slate-200 shrink-0">
+                    <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                        <div id="progress-bar" class="bg-emerald-500 h-2 rounded-full progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Palette Grid -->
+                <div class="flex-1 overflow-y-auto p-4 bg-white" id="palette-scroll-area">
                     <div class="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-2.5" id="palette-grid"></div>
                 </div>
-
-                <!-- Mobile Drawer Submit Button -->
-                <div class="p-3 bg-slate-50 border-t border-slate-200 lg:hidden shrink-0">
-                    <button onclick="toggleMobilePalette(); confirmSubmit();" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-sm shadow">
-                        Submit Assessment
-                    </button>
-                </div>
-            </aside>
+            </div>
         </main>
     </div>
 
-    <!-- ==================== 3. WAITING VIEW (WITH INSTANT SKIP OPTION) ==================== -->
-    <div id="waiting-view" class="h-dvh-screen w-full bg-slate-900 text-white hidden flex-col items-center justify-center p-4 select-none">
-        <div class="max-w-xl w-full bg-white/10 backdrop-blur-xl rounded-3xl border border-white/15 p-6 sm:p-10 flex flex-col items-center text-center shadow-2xl">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold uppercase mb-4">
-                <i class="fa-solid fa-circle-check"></i> Submitted
+    <!-- ==================== 3. 20-SECOND MOTIVATIONAL WAITING SCREEN ==================== -->
+    <div id="waiting-view" class="h-dvh-screen w-full bg-gradient-to-br from-slate-900 via-brand-900 to-slate-900 text-white hidden flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden select-none">
+        <div class="max-w-2xl w-full bg-white/10 backdrop-blur-xl rounded-3xl border border-white/15 p-6 sm:p-10 flex flex-col items-center text-center shadow-2xl relative z-10 fade-in">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold uppercase tracking-widest mb-4">
+                <i class="fa-solid fa-circle-check"></i> Assessment Submitted Successfully
             </div>
-            <h2 class="text-xl sm:text-2xl font-extrabold text-white mb-1">Analyzing Your Performance</h2>
-            <p class="text-xs sm:text-sm text-brand-200 mb-6">Unlocks automatically, or tap skip below:</p>
 
-            <div class="relative w-36 h-36 sm:w-44 sm:h-44 flex items-center justify-center mb-6">
+            <h2 class="text-xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">Compiling Your Performance Analytics</h2>
+            <p class="text-xs sm:text-sm text-brand-200 mb-6">Take a deep breath. Your official answer key will unlock in:</p>
+
+            <div class="relative w-40 h-40 sm:w-48 sm:h-48 flex items-center justify-center mb-6">
                 <svg class="w-full h-full" viewBox="0 0 160 160">
-                    <circle cx="80" cy="80" r="70" stroke="rgba(255,255,255,0.12)" stroke-width="10" fill="none"></circle>
+                    <circle cx="80" cy="80" r="70" stroke="rgba(255, 255, 255, 0.12)" stroke-width="10" fill="none"></circle>
                     <circle id="waiting-circle" class="timer-circle-progress" cx="80" cy="80" r="70" stroke="#38bdf8" stroke-width="10" stroke-linecap="round" fill="none" stroke-dasharray="439.82" stroke-dashoffset="0"></circle>
                 </svg>
                 <div class="absolute inset-0 flex flex-col items-center justify-center">
-                    <span id="waiting-seconds" class="text-4xl sm:text-5xl font-black font-mono">20</span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-brand-200 mt-1">Seconds</span>
+                    <span id="waiting-seconds" class="text-4xl sm:text-5xl font-black tracking-tighter text-white font-mono">20</span>
+                    <span class="text-[11px] font-bold uppercase tracking-widest text-brand-200 mt-1">Seconds</span>
                 </div>
             </div>
 
-            <div class="bg-slate-900/60 border border-white/10 rounded-2xl p-4 sm:p-5 w-full mb-5">
-                <p id="motivational-quote-text" class="text-xs sm:text-sm font-medium text-slate-100 italic leading-relaxed"></p>
+            <div class="bg-slate-900/50 border border-white/10 rounded-2xl p-5 max-w-xl w-full relative mb-5">
+                <p id="motivational-quote-text" class="text-sm sm:text-base font-medium text-slate-100 italic leading-relaxed"></p>
+                <div class="mt-2 text-xs font-bold uppercase tracking-wider text-brand-300" id="motivational-quote-author">Power of Consistency</div>
             </div>
 
-            <button onclick="skipWaitingScreen()" class="px-5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs sm:text-sm border border-white/20 transition-all">
-                Skip & View Results Now <i class="fa-solid fa-bolt ml-1 text-amber-300"></i>
+            <button type="button" onclick="skipWaitingNow()" class="px-5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-bold text-xs sm:text-sm transition-all">
+                Skip Countdown & View Results Now <i class="fa-solid fa-bolt text-amber-300 ml-1"></i>
             </button>
         </div>
     </div>
 
-    <!-- ==================== 4. RESULTS & SOLUTIONS VIEW ==================== -->
-    <div id="results-view" class="min-h-screen w-full bg-slate-100 hidden">
-        <div class="bg-white border-b border-slate-200 px-4 sm:px-6 py-5 shadow-sm sticky top-0 z-30">
-            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
-                <div class="min-w-0">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span id="report-paper-badge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-brand-100 text-brand-700">Ignition 2.0</span>
-                        <span id="report-unit-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 truncate">OS</span>
+    <!-- ==================== 4. RESULTS & ANALYTICS VIEW ==================== -->
+    <div id="results-view" class="min-h-screen w-full bg-slate-100 hidden overflow-y-auto">
+        <div class="bg-white border-b border-slate-200 px-4 sm:px-6 py-6 shadow-sm">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                        <span id="report-candidate-badge" class="text-xs font-extrabold px-3 py-1 rounded-md bg-indigo-600 text-white flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-graduate"></i> Future JRF Tushar
+                        </span>
+                        <span id="report-paper-badge" class="text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md bg-brand-100 text-brand-700">Ignition 2.0</span>
+                        <span id="report-unit-badge" class="text-xs font-bold px-2.5 py-1 rounded-md bg-slate-100 text-slate-700">Operating System</span>
                     </div>
-                    <h1 class="text-lg sm:text-2xl font-extrabold text-slate-800 truncate" id="report-title">Performance Report</h1>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-800">Test Performance Report</h1>
+                    <p class="text-slate-500 font-medium text-xs sm:text-sm mt-1" id="report-title">UGC NET Mock Analysis</p>
                 </div>
-                <div class="flex gap-2 no-print">
-                    <button onclick="resetToSetup()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2 px-3.5 rounded-xl text-xs sm:text-sm flex items-center gap-1.5">
-                        <i class="fa-solid fa-rotate-right"></i> New Test
+                <div class="flex flex-wrap gap-2.5 no-print">
+                    <button type="button" onclick="resetToSetup()" class="bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-4 rounded-xl transition-colors text-xs sm:text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> New / Retake Test
                     </button>
-                    <button onclick="window.print()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold py-2 px-4 rounded-xl text-xs sm:text-sm flex items-center gap-1.5">
-                        <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">Save PDF</span>
+                    <button type="button" onclick="window.print()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold py-2 px-5 rounded-xl shadow-lg transition-colors text-xs sm:text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Print / Save PDF
                     </button>
                 </div>
             </div>
         </div>
 
         <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
-            <!-- 4 KPI Cards -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-                <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
-                    <span class="text-slate-400 font-bold text-[10px] sm:text-xs uppercase">Total Score</span>
-                    <div class="text-2xl sm:text-4xl font-black text-slate-800 my-1" id="res-score">0/0</div>
-                    <div id="res-percent" class="inline-block px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[11px]">0%</div>
+            <!-- Summary Metric Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center relative overflow-hidden">
+                    <div class="absolute top-0 w-full h-1.5 bg-brand-500"></div>
+                    <span class="text-slate-500 font-bold text-xs uppercase tracking-wider mb-2">Total Score</span>
+                    <div class="text-3xl sm:text-5xl font-black text-slate-800 mb-2" id="res-score">0</div>
+                    <div id="res-percent" class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs">0%</div>
                 </div>
-                <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
-                    <span class="text-slate-400 font-bold text-[10px] sm:text-xs uppercase">Accuracy</span>
-                    <div class="text-2xl sm:text-4xl font-black text-slate-800 my-1" id="res-accuracy">0%</div>
-                    <div class="text-[11px] text-slate-500 font-semibold">Correct / Attempted</div>
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center relative overflow-hidden">
+                    <div class="absolute top-0 w-full h-1.5 bg-purple-500"></div>
+                    <span class="text-slate-500 font-bold text-xs uppercase tracking-wider mb-2">Accuracy</span>
+                    <div class="text-3xl sm:text-5xl font-black text-slate-800 mb-2" id="res-accuracy">0%</div>
+                    <div class="text-xs text-slate-500 font-semibold">Correct / Attempted</div>
                 </div>
-                <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
-                    <span class="text-slate-400 font-bold text-[10px] sm:text-xs uppercase">Attempted</span>
-                    <div class="text-2xl sm:text-4xl font-black text-slate-800 my-1" id="res-attempted">0/0</div>
-                    <div class="flex justify-center gap-2 text-[11px] font-bold">
-                        <span class="text-emerald-600" id="res-correct">0 Right</span> • <span class="text-red-600" id="res-wrong">0 Wrong</span>
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center relative overflow-hidden">
+                    <div class="absolute top-0 w-full h-1.5 bg-amber-500"></div>
+                    <span class="text-slate-500 font-bold text-xs uppercase tracking-wider mb-2">Attempted</span>
+                    <div class="text-3xl sm:text-5xl font-black text-slate-800 mb-3" id="res-attempted">0</div>
+                    <div class="flex gap-2 w-full justify-center text-xs">
+                        <div class="flex items-center gap-1 text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg"><i class="fa-solid fa-check"></i> <span id="res-correct">0</span></div>
+                        <div class="flex items-center gap-1 text-red-700 font-bold bg-red-50 border border-red-200 px-2 py-0.5 rounded-lg"><i class="fa-solid fa-xmark"></i> <span id="res-wrong">0</span></div>
                     </div>
                 </div>
-                <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
-                    <span class="text-slate-400 font-bold text-[10px] sm:text-xs uppercase">Time Taken</span>
-                    <div class="text-xl sm:text-3xl font-black text-slate-800 my-1.5 font-mono" id="res-time">00:00:00</div>
-                    <div id="res-avg-time" class="text-[11px] text-slate-500 font-semibold">Avg: 0s / Q</div>
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center relative overflow-hidden">
+                    <div class="absolute top-0 w-full h-1.5 bg-cyan-500"></div>
+                    <span class="text-slate-500 font-bold text-xs uppercase tracking-wider mb-2">Time Taken</span>
+                    <div class="text-2xl sm:text-4xl font-black text-slate-800 mb-2 font-mono" id="res-time">00:00:00</div>
+                    <div id="res-avg-time" class="text-xs text-slate-500 font-semibold">Avg: 0s / Question</div>
                 </div>
             </div>
 
-            <!-- Solutions Filter & List -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-                    <h2 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-brand-500"></i> Detailed Solutions & Explanations
+            <!-- Topic-wise Breakdown -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-8">
+                <h2 class="text-lg sm:text-xl font-extrabold text-slate-800 mb-5 flex items-center gap-3">
+                    <i class="fa-solid fa-chart-pie text-brand-500"></i> Unit & Sub-Topic Performance Analysis
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="topic-analysis-container"></div>
+            </div>
+
+            <!-- Detailed Solution Review -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-8 mb-12">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <h2 class="text-lg sm:text-xl font-extrabold text-slate-800 flex items-center gap-3">
+                        <i class="fa-solid fa-list-check text-brand-500"></i> Answer Key & Detailed Solutions
                     </h2>
-                    <div class="flex flex-wrap gap-1.5 no-print">
-                        <button onclick="filterReview('all')" data-filter="all" class="review-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-600 text-white">All</button>
-                        <button onclick="filterReview('correct')" data-filter="correct" class="review-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600">Correct</button>
-                        <button onclick="filterReview('incorrect')" data-filter="incorrect" class="review-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600">Wrong</button>
-                        <button onclick="filterReview('unattempted')" data-filter="unattempted" class="review-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600">Skipped</button>
+                    <div class="flex flex-wrap gap-2 no-print">
+                        <button type="button" onclick="filterReview('all')" data-filter="all" class="review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-brand-600 text-white">All</button>
+                        <button type="button" onclick="filterReview('correct')" data-filter="correct" class="review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600">Correct</button>
+                        <button type="button" onclick="filterReview('incorrect')" data-filter="incorrect" class="review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600">Incorrect</button>
+                        <button type="button" onclick="filterReview('unattempted')" data-filter="unattempted" class="review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600">Unattempted</button>
                     </div>
                 </div>
-                <div class="space-y-4" id="review-container"></div>
+                <div class="space-y-6" id="review-container"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // ==================== 1. EMBEDDED OS BASICS QUESTION SET (FROM YOUR UPLOADED .JS FILE) ====================
+        // ==================== 1. EMBEDDED OS BASICS QUESTION SET (25 QUESTIONS) ====================
         const BUILTIN_OS_BASICS = [
             { q: "What is an operating system?", opts: ["a) interface between the hardware and application programs", "b) collection of programs that manages hardware resources", "c) system service provider to the application programs", "d) all of the mentioned"], ans: 3, exp: "<b>d) all of the mentioned</b><br>An Operating System acts as an intermediary between user/user applications/application programs and hardware. It is a program that manages hardware resources. It provides services to application programs." },
             { q: "To access the services of the operating system, the interface is provided by the ___________.", opts: ["a) Library", "b) System calls", "c) Assembly instructions", "d) API"], ans: 1, exp: "<b>b) System calls</b><br>To access services of the Operating System an interface is provided by the System Calls. Generally, these are functions written in C and C++. Open, Close, Read, Write are some of most prominently used system calls." },
@@ -525,66 +764,72 @@
 
         const REPO_CATALOG = {
             "ignition-2.0": {
-                label: "Ignition 2.0",
+                label: "Ignition 2.0 (CS)",
                 subjects: [
-                    { folder: "09-os", name: "Operating System (OS)", topics: ["Memory Management, Disk Scheduling by Aditi Ma'am", "Process Management by Aditi Ma'am", "Disk Scheduling & Misc. by Aditi Ma'am", "Memory Management by Aditi Ma'am", "Process Syn. & Deadlock by Aditi Ma'am", "Process Management (2) by Aditi Ma'am", "OS Basics by Aditi Ma'am"] },
-                    { folder: "01-dm", name: "Discrete Mathematics (DM)", topics: ["DM by Aditi Ma'am", "Graph & Group Theory by Aditi Ma'am", "Set, Relation & Lattice by Aditi Ma'am", "Propositional & Predicate Logic by Aditi Ma'am"] },
-                    { folder: "02-dbms", name: "Database Management (DBMS)", topics: ["Functional Dependency by Aditi Ma'am", "File System & DBMS Architecture by Aditi Ma'am", "SQL by Aditi Ma'am", "Indexing & Transaction by Aditi Ma'am", "Normalization by Aditi Ma'am", "ERD & FD by Aditi Ma'am", "DBMS Basics by Aditi Ma'am"] },
-                    { folder: "03-se", name: "Software Engineering (SE)", topics: ["SDLC Models & Designing by Aditi Ma'am", "SE Numericals by Aditi Ma'am", "Testing & Project Management by Aditi Ma'am", "Software Models & Designing by Aditi Ma'am"] },
-                    { folder: "04-pcg", name: "Programming & Graphics (PCG)", topics: ["CG & Prog by Aditi Ma'am", "Programming by Aditi Ma'am", "CG by Aditi Ma'am"] },
-                    { folder: "05-toc", name: "TOC & Compilers", topics: ["TOC & Compiler by Aditi Ma'am", "Semantic Analysis & ICG by Aditi Ma'am", "Compiler Phases & Parsers by Aditi Ma'am", "CFG & TM by Aditi Ma'am", "FA & PDA by Aditi Ma'am", "Chomsky Hierarchy & RE by Aditi Ma'am"] },
-                    { folder: "06-coa", name: "Computer Org. & Arch. (COA)", topics: ["Addressing, I/O Interfacing & Pipelining by Aditi Ma'am", "Pipelining & M/C Instruction by Aditi Ma'am", "Memory Interfacing & Control Unit by Aditi Ma'am", "Instruction Formats & Addressing Modes by Aditi Ma'am", "Basics & Cache Mapping by Aditi Ma'am"] },
-                    { folder: "07-cn", name: "Computer Networking (CN)", topics: ["OSI Models by Aditi Ma'am", "Network Security by Aditi Ma'am", "Transport & Other Layers by Aditi Ma'am", "Network Layer by Aditi Ma'am", "Data Link Layer by Aditi Ma'am", "CN Basics by Aditi Ma'am"] },
-                    { folder: "08-daa", name: "Algorithms (DAA)", topics: ["Data Structure & Algorithm by Aditi Ma'am", "Sorting & Searching by Aditi Ma'am", "Trees by Aditi Ma'am", "DS by Aditi Ma'am"] },
-                    { folder: "10-ai", name: "Artificial Intelligence (AI)", topics: ["AI by Aditi Ma'am", "Miscellaneous Topics by Aditi Ma'am", "Fuzzy Logic by Aditi Ma'am", "Searching & Game Theory by Aditi Ma'am"] },
-                    { folder: "11-dl", name: "Digital Logic (DL)", topics: ["Combinational & Sequential Circuits by Aditi Ma'am", "Digital Logics by Aditi Ma'am"] }
+                    { folder: "09-os", name: "Unit V: Operating System (OS)", icon: "fa-terminal", topics: ["Memory Management, Disk Scheduling by Aditi Ma'am", "Process Management by Aditi Ma'am", "Disk Scheduling & Misc. by Aditi Ma'am", "Memory Management by Aditi Ma'am", "Process Syn. & Deadlock by Aditi Ma'am", "Process Management (2) by Aditi Ma'am", "OS Basics by Aditi Ma'am"] },
+                    { folder: "01-dm", name: "Unit I: Discrete Mathematics (DM)", icon: "fa-diagram-project", topics: ["DM by Aditi Ma'am", "Graph & Group Theory by Aditi Ma'am", "Set, Relation & Lattice by Aditi Ma'am", "Propositional & Predicate Logic by Aditi Ma'am"] },
+                    { folder: "02-dbms", name: "Unit IV: Database Management (DBMS)", icon: "fa-database", topics: ["Functional Dependency by Aditi Ma'am", "File System & DBMS Architecture by Aditi Ma'am", "SQL by Aditi Ma'am", "Indexing & Transaction by Aditi Ma'am", "Normalization by Aditi Ma'am", "ERD & FD by Aditi Ma'am", "DBMS Basics by Aditi Ma'am"] },
+                    { folder: "03-se", name: "Unit VI: Software Engineering (SE)", icon: "fa-gears", topics: ["SDLC Models & Designing by Aditi Ma'am", "SE Numericals by Aditi Ma'am", "Testing & Project Management by Aditi Ma'am", "Software Models & Designing by Aditi Ma'am"] },
+                    { folder: "04-pcg", name: "Unit III: Programming & Graphics", icon: "fa-code", topics: ["CG & Prog by Aditi Ma'am", "Programming by Aditi Ma'am", "CG by Aditi Ma'am"] },
+                    { folder: "05-toc", name: "Unit VIII: TOC & Compilers", icon: "fa-infinity", topics: ["TOC & Compiler by Aditi Ma'am", "Semantic Analysis & ICG by Aditi Ma'am", "Compiler Phases & Parsers by Aditi Ma'am", "CFG & TM by Aditi Ma'am", "FA & PDA by Aditi Ma'am", "Chomsky Hierarchy & RE by Aditi Ma'am"] },
+                    { folder: "06-coa", name: "Unit II: Computer Architecture (COA)", icon: "fa-microchip", topics: ["Addressing, I/O Interfacing & Pipelining by Aditi Ma'am", "Pipelining & M/C Instruction by Aditi Ma'am", "Memory Interfacing & Control Unit by Aditi Ma'am", "Instruction Formats & Addressing Modes by Aditi Ma'am", "Basics & Cache Mapping by Aditi Ma'am"] },
+                    { folder: "07-cn", name: "Unit IX: Computer Networking (CN)", icon: "fa-tower-broadcast", topics: ["OSI Models by Aditi Ma'am", "Network Security by Aditi Ma'am", "Transport & Other Layers by Aditi Ma'am", "Network Layer by Aditi Ma'am", "Data Link Layer by Aditi Ma'am", "CN Basics by Aditi Ma'am"] },
+                    { folder: "08-daa", name: "Unit VII: Algorithms (DAA)", icon: "fa-sitemap", topics: ["Data Structure & Algorithm by Aditi Ma'am", "Sorting & Searching by Aditi Ma'am", "Trees by Aditi Ma'am", "DS by Aditi Ma'am"] },
+                    { folder: "10-ai", name: "Unit X: Artificial Intelligence (AI)", icon: "fa-robot", topics: ["AI by Aditi Ma'am", "Miscellaneous Topics by Aditi Ma'am", "Fuzzy Logic by Aditi Ma'am", "Searching & Game Theory by Aditi Ma'am"] },
+                    { folder: "11-dl", name: "Unit II: Digital Logics (DL)", icon: "fa-bolt", topics: ["Combinational & Sequential Circuits by Aditi Ma'am", "Digital Logics by Aditi Ma'am"] }
                 ]
             },
             "ignition-1.0": {
-                label: "Ignition 1.0",
+                label: "Ignition 1.0 (CS)",
                 subjects: [
-                    { folder: "09-os", name: "Operating System (OS)", topics: ["01 Memory Management, Disk Scheduling by Aditi Ma'am", "02 Process Management by Aditi Ma'am", "03 Disc Scheduling | OS | By Aditi Ma'am", "04 Memory Management | OS | By Aditi Ma'am", "05 Deadlock & Miscellaneous Topics | OS | By Aditi Ma'am", "06 OS Basics & Process Management | OS | By Aditi Ma'am"] },
-                    { folder: "01-dm", name: "Discrete Mathematics (DM)", topics: ["01 DM by Aditi Ma'am", "02 Miscellaneous Topics | DM | By Aditi Ma'am", "03 Graph & Group Theory | DM | By Aditi Ma'am", "04 Set & Relation | DM | By Aditi Ma'am", "05 Propositional Logic | DM | By Aditi Ma'am"] },
-                    { folder: "02-dbms", name: "Database Management (DBMS)", topics: ["01 Functional Dependency by Aditi Ma'am", "02 File System & DBMS Architecture by Aditi Ma'am", "03 SQL Part 2 | DBMS | By Aditi Ma'am", "04 SQL Part 1 | DBMS | By Aditi Ma'am", "05 Miscellaneous Topics | DBMS | By Aditi Ma'am", "06 Transaction | DBMS | By Aditi Ma'am", "07 Normalization | DBMS | By Aditi Ma'am", "08 Functional Dependency | DBMS | By Aditi Ma'am", "09 Basics of DBMS | By Aditi Ma'am"] },
-                    { folder: "03-se", name: "Software Engineering (SE)", topics: ["01 SDLC Models & Designing by Aditi Ma'am", "02 SE Numericals | SE | By Aditi Ma'am", "03 Software Testing | SE | By Aditi Ma'am", "04 Miscellaneous Terms | SE | By Aditi Ma'am", "05 Software Designing | SE | By Aditi Ma'am", "06 SDLC Models | SE | By Aditi Ma'am"] },
-                    { folder: "04-pcg", name: "Programming & Graphics (PCG)", topics: ["01 CG & Prog by Aditi Ma'am", "02 Programming PYQs Part 3 | By Aditi Ma'am", "03 Programming PYQs Part 2 | By Aditi Ma'am", "04 Programming PYQs Part 1 | By Aditi Ma'am", "05 CG Numericals | CG | By Aditi Ma'am", "06 Theory based PYQ on CG | CG | By Aditi Ma'am"] },
-                    { folder: "05-toc", name: "TOC & Compilers", topics: ["01 TOC & Compiler by Aditi Ma'am", "02 Compiler | By Aditi Ma'am", "03 Turing Machine | TOC | By Aditi Ma'am", "04 REC & RE Language | TOC | By Aditi Ma'am", "05 Ambiguity in CFG | TOC | By Aditi Ma'am", "06 Context Free Grammar Part 2 | TOC | By Aditi Ma'am", "07 Context Free Grammar Part 1 | TOC | By Aditi Ma'am", "08 Regular Expression | TOC | By Aditi Ma'am", "09 Regular Language | TOC | By Aditi Ma'am", "10 Chomsky Hierarchy | TOC | By Aditi Ma'am"] },
-                    { folder: "06-coa", name: "Computer Org. & Arch. (COA)", topics: ["01 Addressing, I/O Interfacing & Pipelining by Aditi Ma'am", "02 Machine Instructions | COA | By Aditi Ma'am", "03 Memory Interfacing & Control Units | COA | By Aditi Ma'am", "04 Cache Memory & Addressing Modes Part 1 | COA | By Aditi Ma'am", "05 Cache Memory & Addressing Modes Part 2 | COA | By Aditi Ma'am"] },
-                    { folder: "07-cn", name: "Computer Networking (CN)", topics: ["01 OSI models by Aditi Ma'am", "02 Miscellaneous Topics | CN | By Aditi Ma'am", "03 Transport Layer | CN | By Aditi Ma'am", "04 Network Layer Part 2 | CN | By Aditi Ma'am", "05 Network Layer | CN | By Aditi Ma'am", "06 Data Link Layer | CN | By Aditi Ma'am", "07 Physical Layer Part 2 | CN | By Aditi Ma'am", "08 Physical Layer | CN | By Aditi Ma'am", "09 OSI Layers | CN | By Aditi Ma'am"] },
-                    { folder: "08-daa", name: "Algorithms (DAA)", topics: ["01 Data Structure & Algorithm by Aditi Ma'am", "02 Time Complexities Part 2 | DAA | By Aditi Ma'am", "03 Time Complexities | DAA | By Aditi Ma'am", "04 Greedy & Dynamic Algorithm | DAA | By Aditi Ma'am", "05 Trees Part 2 | DAA | By Aditi Ma'am", "06 Trees | DAA | By Aditi Ma'am", "07 Basics of DAA | DAA | By Aditi Ma'am"] },
-                    { folder: "10-ai", name: "Artificial Intelligence (AI)", topics: ["01 AI by Aditi Ma'am", "02 Fuzzy Logic Part 2 | AI | By Aditi Ma'am", "03 Fuzzy Logic | AI | By Aditi Ma'am", "04 Agents & Searching Algorithms | AI | By Aditi Ma'am"] },
-                    { folder: "11-dl", name: "Digital Logic (DL)", topics: ["01 Combinational & Sequential Circuits by Aditi Ma'am", "02 Sequential Circuits & Number System | By Aditi Ma'am", "03 Boolean Algebra & Combinational Circuit | By Aditi Ma'am"] },
-                    { folder: "12-cs", name: "Counselling Session", topics: ["01 Counselling Session By Aditi Ma'am"] }
+                    { folder: "09-os", name: "Unit V: Operating System (OS)", icon: "fa-terminal", topics: ["01 Memory Management, Disk Scheduling by Aditi Ma'am", "02 Process Management by Aditi Ma'am", "03 Disc Scheduling | OS | By Aditi Ma'am", "04 Memory Management | OS | By Aditi Ma'am", "05 Deadlock & Miscellaneous Topics | OS | By Aditi Ma'am", "06 OS Basics & Process Management | OS | By Aditi Ma'am"] },
+                    { folder: "01-dm", name: "Unit I: Discrete Mathematics (DM)", icon: "fa-diagram-project", topics: ["01 DM by Aditi Ma'am", "02 Miscellaneous Topics | DM | By Aditi Ma'am", "03 Graph & Group Theory | DM | By Aditi Ma'am", "04 Set & Relation | DM | By Aditi Ma'am", "05 Propositional Logic | DM | By Aditi Ma'am"] },
+                    { folder: "02-dbms", name: "Unit IV: Database Management (DBMS)", icon: "fa-database", topics: ["01 Functional Dependency by Aditi Ma'am", "02 File System & DBMS Architecture by Aditi Ma'am", "03 SQL Part 2 | DBMS | By Aditi Ma'am", "04 SQL Part 1 | DBMS | By Aditi Ma'am", "05 Miscellaneous Topics | DBMS | By Aditi Ma'am", "06 Transaction | DBMS | By Aditi Ma'am", "07 Normalization | DBMS | By Aditi Ma'am", "08 Functional Dependency | DBMS | By Aditi Ma'am", "09 Basics of DBMS | By Aditi Ma'am"] },
+                    { folder: "03-se", name: "Unit VI: Software Engineering (SE)", icon: "fa-gears", topics: ["01 SDLC Models & Designing by Aditi Ma'am", "02 SE Numericals | SE | By Aditi Ma'am", "03 Software Testing | SE | By Aditi Ma'am", "04 Miscellaneous Terms | SE | By Aditi Ma'am", "05 Software Designing | SE | By Aditi Ma'am", "06 SDLC Models | SE | By Aditi Ma'am"] },
+                    { folder: "04-pcg", name: "Unit III: Programming & Graphics", icon: "fa-code", topics: ["01 CG & Prog by Aditi Ma'am", "02 Programming PYQs Part 3 | By Aditi Ma'am", "03 Programming PYQs Part 2 | By Aditi Ma'am", "04 Programming PYQs Part 1 | By Aditi Ma'am", "05 CG Numericals | CG | By Aditi Ma'am", "06 Theory based PYQ on CG | CG | By Aditi Ma'am"] },
+                    { folder: "05-toc", name: "Unit VIII: TOC & Compilers", icon: "fa-infinity", topics: ["01 TOC & Compiler by Aditi Ma'am", "02 Compiler | By Aditi Ma'am", "03 Turing Machine | TOC | By Aditi Ma'am", "04 REC & RE Language | TOC | By Aditi Ma'am", "05 Ambiguity in CFG | TOC | By Aditi Ma'am", "06 Context Free Grammar Part 2 | TOC | By Aditi Ma'am", "07 Context Free Grammar Part 1 | TOC | By Aditi Ma'am", "08 Regular Expression | TOC | By Aditi Ma'am", "09 Regular Language | TOC | By Aditi Ma'am", "10 Chomsky Hierarchy | TOC | By Aditi Ma'am"] },
+                    { folder: "06-coa", name: "Unit II: Computer Architecture (COA)", icon: "fa-microchip", topics: ["01 Addressing, I/O Interfacing & Pipelining by Aditi Ma'am", "02 Machine Instructions | COA | By Aditi Ma'am", "03 Memory Interfacing & Control Units | COA | By Aditi Ma'am", "04 Cache Memory & Addressing Modes Part 1 | COA | By Aditi Ma'am", "05 Cache Memory & Addressing Modes Part 2 | COA | By Aditi Ma'am"] },
+                    { folder: "07-cn", name: "Unit IX: Computer Networking (CN)", icon: "fa-tower-broadcast", topics: ["01 OSI models by Aditi Ma'am", "02 Miscellaneous Topics | CN | By Aditi Ma'am", "03 Transport Layer | CN | By Aditi Ma'am", "04 Network Layer Part 2 | CN | By Aditi Ma'am", "05 Network Layer | CN | By Aditi Ma'am", "06 Data Link Layer | CN | By Aditi Ma'am", "07 Physical Layer Part 2 | CN | By Aditi Ma'am", "08 Physical Layer | CN | By Aditi Ma'am", "09 OSI Layers | CN | By Aditi Ma'am"] },
+                    { folder: "08-daa", name: "Unit VII: Algorithms (DAA)", icon: "fa-sitemap", topics: ["01 Data Structure & Algorithm by Aditi Ma'am", "02 Time Complexities Part 2 | DAA | By Aditi Ma'am", "03 Time Complexities | DAA | By Aditi Ma'am", "04 Greedy & Dynamic Algorithm | DAA | By Aditi Ma'am", "05 Trees Part 2 | DAA | By Aditi Ma'am", "06 Trees | DAA | By Aditi Ma'am", "07 Basics of DAA | DAA | By Aditi Ma'am"] },
+                    { folder: "10-ai", name: "Unit X: Artificial Intelligence (AI)", icon: "fa-robot", topics: ["01 AI by Aditi Ma'am", "02 Fuzzy Logic Part 2 | AI | By Aditi Ma'am", "03 Fuzzy Logic | AI | By Aditi Ma'am", "04 Agents & Searching Algorithms | AI | By Aditi Ma'am"] },
+                    { folder: "11-dl", name: "Unit II: Digital Logics (DL)", icon: "fa-bolt", topics: ["01 Combinational & Sequential Circuits by Aditi Ma'am", "02 Sequential Circuits & Number System | By Aditi Ma'am", "03 Boolean Algebra & Combinational Circuit | By Aditi Ma'am"] },
+                    { folder: "12-cs", name: "Counselling Session", icon: "fa-comments", topics: ["01 Counselling Session By Aditi Ma'am"] }
                 ]
             },
             "paper-1": {
-                label: "Paper 1",
+                label: "Paper 1 (General)",
                 subjects: [
-                    { folder: "01-teaching-aptitude", name: "Unit I: Teaching Aptitude", topics: ["10 What is Teaching Aptitude | Levels of Teaching", "09 Bloom's Taxonomy by Aditi Mam", "08 Learner's Characteristics by Aditi Mam", "07 Swayam and SwayamPrabha by Aditi Mam", "06 Swayam Plus and MOOC by Aditi Mam", "05 LMS AND TOOLS by Aditi Mam", "04 DCS + PRACTICE SESSION by Aditi Mam", "03 Cooperative Learning and Strategies", "02 Teacher and Learner Centered Methods | Learning Disabilities", "01 Transfer of Learning by Aditi Mam"] },
-                    { folder: "02-research-aptitude", name: "Unit II: Research Aptitude", topics: ["12 Research Intro by Aditi Ma'am", "11 Research Process by Aditi Ma'am", "10 Research Types by Aditi Ma'am Coming Soon", "09 Research Types Part 2 by Aditi Ma'am", "08 Research Types Part 3 by Aditi Ma'am", "07 Research Types Part 4 by Aditi Ma'am", "06 Variables by Aditi Ma'am", "05 Sampling by Aditi Ma'am", "04 Hypothesis by Aditi Ma'am", "03 Hypothesis Testing by Aditi Ma'am", "02 Hypothesis Testing Part 2 by Aditi Ma'am", "01 Hypothesis Testing Part 3 by Aditi Ma'am Live Soon"] },
-                    { folder: "08-ict", name: "Unit VIII: ICT", topics: ["15 Generation of Computer by Aditi Ma'am", "14 Generation of Language by Aditi Ma'am", "13 Softwares & its Types by Aditi Ma'am", "12 Printers & VDU by Aditi Ma'am", "11 Memory System by Aditi Ma'am", "10 Memory Numerical by Aditi Ma'am", "09 OSI & Network Devices by Aditi Ma'am", "08 Internet by Aditi Ma'am", "07 Misc Terms of Internet by Aditi Ma'am", "06 Malwares by Aditi Ma'am", "05 Types of Virsus & Hackers by Aditi Ma'am", "04 MS Office by Aditi Ma'am", "03 Number System by Aditi Ma'am", "02 Web Gen & Advanced Technology by Aditi Ma'am", "01 Full Forms & Inventors by Aditi Ma'am"] },
-                    { folder: "05-maths-reasoning", name: "Unit V: Maths & Reasoning", topics: ["20 Average Part 1 by Vishwas Sir", "19 Average Part 2 by Vishwas Sir", "18 Average Part 3 by Vishwas Sir", "17 Age by Vishwas Sir", "16 Age Part 2 by Vishwas Sir", "15 Doubt clearing session + Percentage Introduction by Vishwas Sir", "14 Percentage by Vishwas Sir", "13 Percentage Part 2 by Vishwas Sir", "12 Percentage Part 3 by Vishwas Sir", "11 Percentage - 4 by Vishwas Sir", "10 Percentage - 5 by Vishwas Sir", "09 Profit Loss - 1 by Vishwas Sir", "08 Profit Loss - 2 by Vishwas Sir", "07 Profit Loss - 3 & Doubt Session by Vishwas Sir", "06 Discount by Vishwas Sir", "05 Discount -2 + Doubt Clearing Session", "04 Simple Interest by Vishwas Sir", "03 Simple Interest Part 2", "02 Simple Interest Part 3", "01 Compound Interest 1 by Vishwas Sir Live Now"] },
-                    { folder: "09-pde", name: "Unit IX: People, Dev & Env", topics: ["13 Demo Session of Paper 1 by Priyanshi Ma'am", "12 smog, pollutants and its types (part 1)", "11 pollutants and its types (part 2) by Priyanshi Mam", "10 types of lakes and toxicity", "09 water pollution by Priyanshi Mam", "08 Energy and its type by Priyanshi Mam", "07 Energy and its type", "06 Noise Pollution by Priyanshi Mam", "05 Toxicity and solid waste management", "04 Natural Disaster (part 1) by Priyanshi Mam", "03 Protocols and conferences (part 1) by Priyanshi Ma'am", "02 Protocols and conferences (part 2) by Priyanshi Ma'am", "01 MCQs Practice Session (2020-2026)by Priyanshi Mam"] },
-                    { folder: "03-comprehension", name: "Unit III: Comprehension", topics: ["01 Reading Comprehension Set 1"] },
-                    { folder: "04-communication", name: "Unit IV: Communication", topics: ["01 Communication PYQs Set 1"] },
-                    { folder: "06-logical-reasoning", name: "Unit VI: Logical Reasoning", topics: ["01 Logical Reasoning & Indian Logic Set 1"] },
-                    { folder: "07-data-interpretation", name: "Unit VII: Data Interpretation", topics: ["01 Data Interpretation Set 1"] },
-                    { folder: "10-higher-education", name: "Unit X: Higher Education", topics: ["01 Higher Education System Set 1"] }
+                    { folder: "01-teaching-aptitude", name: "Unit I: Teaching Aptitude", icon: "fa-chalkboard-user", topics: ["10 What is Teaching Aptitude | Levels of Teaching", "09 Bloom's Taxonomy by Aditi Mam", "08 Learner's Characteristics by Aditi Mam", "07 Swayam and SwayamPrabha by Aditi Mam", "06 Swayam Plus and MOOC by Aditi Mam", "05 LMS AND TOOLS by Aditi Mam", "04 DCS + PRACTICE SESSION by Aditi Mam", "03 Cooperative Learning and Strategies", "02 Teacher and Learner Centered Methods | Learning Disabilities", "01 Transfer of Learning by Aditi Mam"] },
+                    { folder: "02-research-aptitude", name: "Unit II: Research Aptitude", icon: "fa-flask", topics: ["12 Research Intro by Aditi Ma'am", "11 Research Process by Aditi Ma'am", "10 Research Types by Aditi Ma'am Coming Soon", "09 Research Types Part 2 by Aditi Ma'am", "08 Research Types Part 3 by Aditi Ma'am", "07 Research Types Part 4 by Aditi Ma'am", "06 Variables by Aditi Ma'am", "05 Sampling by Aditi Ma'am", "04 Hypothesis by Aditi Ma'am", "03 Hypothesis Testing by Aditi Ma'am", "02 Hypothesis Testing Part 2 by Aditi Ma'am", "01 Hypothesis Testing Part 3 by Aditi Ma'am Live Soon"] },
+                    { folder: "08-ict", name: "Unit VIII: ICT", icon: "fa-network-wired", topics: ["15 Generation of Computer by Aditi Ma'am", "14 Generation of Language by Aditi Ma'am", "13 Softwares & its Types by Aditi Ma'am", "12 Printers & VDU by Aditi Ma'am", "11 Memory System by Aditi Ma'am", "10 Memory Numerical by Aditi Ma'am", "09 OSI & Network Devices by Aditi Ma'am", "08 Internet by Aditi Ma'am", "07 Misc Terms of Internet by Aditi Ma'am", "06 Malwares by Aditi Ma'am", "05 Types of Virsus & Hackers by Aditi Ma'am", "04 MS Office by Aditi Ma'am", "03 Number System by Aditi Ma'am", "02 Web Gen & Advanced Technology by Aditi Ma'am", "01 Full Forms & Inventors by Aditi Ma'am"] },
+                    { folder: "05-maths-reasoning", name: "Unit V: Maths & Reasoning", icon: "fa-square-root-variable", topics: ["20 Average Part 1 by Vishwas Sir", "19 Average Part 2 by Vishwas Sir", "18 Average Part 3 by Vishwas Sir", "17 Age by Vishwas Sir", "16 Age Part 2 by Vishwas Sir", "15 Doubt clearing session + Percentage Introduction by Vishwas Sir", "14 Percentage by Vishwas Sir", "13 Percentage Part 2 by Vishwas Sir", "12 Percentage Part 3 by Vishwas Sir", "11 Percentage - 4 by Vishwas Sir", "10 Percentage - 5 by Vishwas Sir", "09 Profit Loss - 1 by Vishwas Sir", "08 Profit Loss - 2 by Vishwas Sir", "07 Profit Loss - 3 & Doubt Session by Vishwas Sir", "06 Discount by Vishwas Sir", "05 Discount -2 + Doubt Clearing Session", "04 Simple Interest by Vishwas Sir", "03 Simple Interest Part 2", "02 Simple Interest Part 3", "01 Compound Interest 1 by Vishwas Sir Live Now"] },
+                    { folder: "09-pde", name: "Unit IX: People, Dev. & Env.", icon: "fa-earth-asia", topics: ["13 Demo Session of Paper 1 by Priyanshi Ma'am", "12 smog, pollutants and its types (part 1)", "11 pollutants and its types (part 2) by Priyanshi Mam", "10 types of lakes and toxicity", "09 water pollution by Priyanshi Mam", "08 Energy and its type by Priyanshi Mam", "07 Energy and its type", "06 Noise Pollution by Priyanshi Mam", "05 Toxicity and solid waste management", "04 Natural Disaster (part 1) by Priyanshi Mam", "03 Protocols and conferences (part 1) by Priyanshi Ma'am", "02 Protocols and conferences (part 2) by Priyanshi Ma'am", "01 MCQs Practice Session (2020-2026)by Priyanshi Mam"] },
+                    { folder: "03-comprehension", name: "Unit III: Comprehension", icon: "fa-book-open", topics: ["01 Reading Comprehension Set 1"] },
+                    { folder: "04-communication", name: "Unit IV: Communication", icon: "fa-comments", topics: ["01 Communication PYQs Set 1"] },
+                    { folder: "06-logical-reasoning", name: "Unit VI: Logical Reasoning", icon: "fa-brain", topics: ["01 Logical Reasoning & Indian Logic Set 1"] },
+                    { folder: "07-data-interpretation", name: "Unit VII: Data Interpretation", icon: "fa-chart-column", topics: ["01 Data Interpretation Set 1"] },
+                    { folder: "10-higher-education", name: "Unit X: Higher Education", icon: "fa-building-columns", topics: ["01 Higher Education System Set 1"] }
                 ]
             }
         };
 
         const consistencyQuotes = [
-            "Success in UGC NET isn't built on a single high score, but on the quiet discipline of showing up every single day to analyze, learn, and improve.",
-            "Every wrong answer you discover today is one less mistake you will make in the examination hall.",
-            "Mastery across Paper 1 and Paper 2 comes from relentless daily practice. Trust your preparation."
+            { quote: "It is not the score of a single mock test that defines your JRF journey, but your unwavering discipline to show up, analyze your mistakes, and improve 1% every single day.", theme: "Power of Daily Consistency" },
+            { quote: "Success is the sum of small efforts, repeated day in and day out. Regardless of what the next screen shows, your consistency today has already made you sharper than yesterday.", theme: "Discipline Over Motivation" },
+            { quote: "Every wrong answer you discover today is one less mistake you will make in the examination hall. Embrace the analysis with a calm and consistent mind.", theme: "Continuous Improvement" },
+            { quote: "Mastery across all 20 units comes from patience and persistence. Brick by brick, mock by mock, you are building an unshakable foundation.", theme: "Steady Progress" }
         ];
 
-        // ==================== 3. STATE VARIABLES ====================
-        let currentBatchKey = "ignition-2.0";
-        let currentSubjectObj = null;
-        let activeTopicTitle = "";
-        let testTimerMode = "overall";
+        // ==================== 3. APPLICATION STATE ====================
+        let selectedCandidate = 'Future JRF Tushar';
+        let selectedCandidateShort = 'FT';
+        let selectedCandidateTheme = 'indigo';
+        let currentWizardStep = 1;
+
+        let selectedBatch = 'ignition-2.0';
+        let selectedSubjectIndex = 0;
+        let selectedTopicIndex = 6; // Defaults to OS Basics
+        let testTimerMode = 'overall';
         let timeLimitPerQ = 60;
 
         let questions = [];
@@ -596,38 +841,190 @@
         let waitingInterval = null;
         let totalTimeSpent = 0;
         let isDataLoaded = false;
+        let activeTestName = "OS Basics by Aditi Ma'am";
 
         window.addEventListener('DOMContentLoaded', () => {
             selectBatch('ignition-2.0');
+            openOnboardingWizard();
         });
 
-        // ==================== 4. BATCH / SUBJECT / TOPIC SELECTION ====================
+        // ==================== 4. COLORFUL 4-STEP ONBOARDING WIZARD ====================
+        function openOnboardingWizard() {
+            const modal = document.getElementById('onboarding-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setWizardStep(1);
+        }
+
+        function closeOnboardingWizard() {
+            const modal = document.getElementById('onboarding-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function setWizardStep(step) {
+            currentWizardStep = step;
+            ['wizard-step-1', 'wizard-step-2', 'wizard-step-3', 'wizard-step-4'].forEach((id, idx) => {
+                document.getElementById(id).classList.toggle('hidden', (idx + 1) !== step);
+            });
+
+            const backBtn = document.getElementById('wizard-back-btn');
+            const progressBar = document.getElementById('wizard-progress-bar');
+            const stepBadge = document.getElementById('wizard-step-badge');
+            const title = document.getElementById('wizard-title');
+
+            if (step === 1) {
+                backBtn.classList.add('hidden');
+                backBtn.classList.remove('inline-flex');
+                progressBar.style.width = '25%';
+                stepBadge.innerText = 'Step 1 of 4 • Aspirant Identity';
+                title.innerText = 'Who is attempting this test today?';
+            } else if (step === 2) {
+                backBtn.classList.remove('hidden');
+                backBtn.classList.add('inline-flex');
+                progressBar.style.width = '50%';
+                stepBadge.innerText = 'Step 2 of 4 • Select Batch';
+                title.innerText = 'Choose Your Preparation Batch';
+                document.getElementById('wizard-greeting-pill').innerHTML = `<i class="fa-solid fa-user-graduate"></i> Welcome, ${selectedCandidate}!`;
+            } else if (step === 3) {
+                backBtn.classList.remove('hidden');
+                backBtn.classList.add('inline-flex');
+                progressBar.style.width = '75%';
+                stepBadge.innerText = 'Step 3 of 4 • Subject / Unit';
+                title.innerText = 'Choose Your Subject / Unit';
+                renderWizardSubjects();
+            } else if (step === 4) {
+                backBtn.classList.remove('hidden');
+                backBtn.classList.add('inline-flex');
+                progressBar.style.width = '100%';
+                stepBadge.innerText = 'Step 4 of 4 • Topic (.js File)';
+                title.innerText = 'Choose Your Topic Question Bank';
+                renderWizardTopics();
+            }
+        }
+
+        function wizardPrevStep() {
+            if (currentWizardStep > 1) setWizardStep(currentWizardStep - 1);
+        }
+
+        function selectWizardCandidate(fullName, shortName, themeColor) {
+            selectedCandidate = fullName;
+            selectedCandidateShort = shortName;
+            selectedCandidateTheme = themeColor;
+            updateCandidateBadgesEverywhere();
+            setWizardStep(2);
+        }
+
+        function selectWizardBatch(batchKey) {
+            selectBatch(batchKey);
+            if (batchKey === 'custom') {
+                closeOnboardingWizard();
+                return;
+            }
+            setWizardStep(3);
+        }
+
+        function renderWizardSubjects() {
+            const grid = document.getElementById('wizard-subjects-grid');
+            const pill = document.getElementById('wizard-selected-batch-pill');
+            grid.innerHTML = '';
+
+            const batchObj = REPO_CATALOG[selectedBatch];
+            pill.innerText = batchObj.label;
+
+            const palettes = [
+                'from-indigo-500 to-blue-500 border-indigo-200 hover:border-indigo-500 bg-indigo-50/40',
+                'from-purple-500 to-fuchsia-500 border-purple-200 hover:border-purple-500 bg-purple-50/40',
+                'from-emerald-500 to-teal-500 border-emerald-200 hover:border-emerald-500 bg-emerald-50/40',
+                'from-rose-500 to-pink-500 border-rose-200 hover:border-rose-500 bg-rose-50/40',
+                'from-amber-500 to-orange-500 border-amber-200 hover:border-amber-500 bg-amber-50/40'
+            ];
+
+            batchObj.subjects.forEach((subj, idx) => {
+                const [gradFrom, gradTo, borderCol, hoverBorder, bgLight] = palettes[idx % palettes.length].split(' ');
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `unit-pill-card rounded-2xl p-3.5 text-left border-2 ${borderCol} ${hoverBorder} ${bgLight} hover:bg-white shadow-sm flex items-center gap-3.5 group`;
+                btn.onclick = () => {
+                    document.getElementById('setting-subject').value = idx;
+                    handleSubjectChange();
+                    setWizardStep(4);
+                };
+                btn.innerHTML = `
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr ${gradFrom} ${gradTo} text-white flex items-center justify-center text-base shadow-sm shrink-0">
+                        <i class="fa-solid ${subj.icon || 'fa-book'}"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="text-xs sm:text-sm font-extrabold text-slate-800 truncate">${subj.name}</div>
+                        <div class="text-[11px] font-semibold text-slate-500 mt-0.5">${subj.topics.length} Topic Files Available</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-400"></i>
+                `;
+                grid.appendChild(btn);
+            });
+        }
+
+        function renderWizardTopics() {
+            const grid = document.getElementById('wizard-topics-grid');
+            const pill = document.getElementById('wizard-selected-subject-pill');
+            grid.innerHTML = '';
+
+            const subjObj = REPO_CATALOG[selectedBatch].subjects[selectedSubjectIndex];
+            pill.innerText = subjObj.name;
+
+            subjObj.topics.forEach((topicTitle, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `unit-pill-card rounded-2xl p-3.5 text-left border-2 border-slate-200 hover:border-brand-500 bg-slate-50/70 hover:bg-brand-50/40 shadow-sm flex items-center gap-3 group`;
+                btn.onclick = () => {
+                    document.getElementById('setting-topic').value = idx;
+                    handleTopicChange();
+                    closeOnboardingWizard();
+                };
+                btn.innerHTML = `
+                    <div class="w-9 h-9 rounded-xl bg-brand-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                        #${idx + 1}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">${topicTitle}</div>
+                        <div class="text-[10px] font-mono text-slate-400 truncate mt-0.5">${sanitizeFilename(idx + 1, topicTitle)}</div>
+                    </div>
+                    <i class="fa-solid fa-play text-brand-600 text-xs"></i>
+                `;
+                grid.appendChild(btn);
+            });
+        }
+
+        // ==================== 5. SETUP SCREEN BATCH / SUBJECT / TOPIC LOGIC ====================
         function selectBatch(batchKey) {
-            currentBatchKey = batchKey;
-            document.querySelectorAll('.batch-tab').forEach(btn => {
-                if (btn.getAttribute('data-batch') === batchKey) {
-                    btn.className = "batch-tab py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-brand-600 bg-brand-50 text-brand-700 flex items-center justify-center gap-1.5 transition-all";
+            selectedBatch = batchKey;
+            ['ignition-2.0', 'ignition-1.0', 'paper-1', 'custom'].forEach(key => {
+                const btn = document.getElementById('batch-btn-' + key);
+                if (!btn) return;
+                if (key === batchKey) {
+                    btn.className = "py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-brand-600 bg-brand-50 text-brand-700 transition-all flex items-center justify-center gap-1.5 shadow-sm";
                 } else {
-                    btn.className = "batch-tab py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition-all";
+                    btn.className = "py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5";
                 }
             });
 
-            const repoBox = document.getElementById('repo-selector-box');
-            const customBox = document.getElementById('custom-upload-box');
+            const repoContainer = document.getElementById('repo-selector-container');
+            const localContainer = document.getElementById('local-upload-container');
 
             if (batchKey === 'custom') {
-                repoBox.classList.add('hidden');
-                customBox.classList.remove('hidden');
-                customBox.classList.add('flex');
-                disableStartButton("Upload a .js File to Begin");
+                repoContainer.classList.add('hidden');
+                localContainer.classList.remove('hidden');
+                localContainer.classList.add('flex');
+                resetUploadState();
+                updateSetupSummaryBanner();
                 return;
             }
 
-            repoBox.classList.remove('hidden');
-            customBox.classList.add('hidden');
-            customBox.classList.remove('flex');
+            repoContainer.classList.remove('hidden');
+            localContainer.classList.add('hidden');
+            localContainer.classList.remove('flex');
 
-            const subjSelect = document.getElementById('subject-select');
+            const subjSelect = document.getElementById('setting-subject');
             subjSelect.innerHTML = '';
             REPO_CATALOG[batchKey].subjects.forEach((s, idx) => {
                 const opt = document.createElement('option');
@@ -636,21 +1033,22 @@
                 subjSelect.appendChild(opt);
             });
 
+            selectedSubjectIndex = 0;
             handleSubjectChange();
         }
 
         function handleSubjectChange() {
-            const subjIdx = parseInt(document.getElementById('subject-select').value) || 0;
-            currentSubjectObj = REPO_CATALOG[currentBatchKey].subjects[subjIdx];
+            const subjSelect = document.getElementById('setting-subject');
+            selectedSubjectIndex = parseInt(subjSelect.value) || 0;
+            const subjObj = REPO_CATALOG[selectedBatch].subjects[selectedSubjectIndex];
 
-            const topicSelect = document.getElementById('topic-select');
+            const topicSelect = document.getElementById('setting-topic');
             topicSelect.innerHTML = '';
-            currentSubjectObj.topics.forEach((t, idx) => {
+            subjObj.topics.forEach((t, idx) => {
                 const opt = document.createElement('option');
                 opt.value = idx;
                 opt.textContent = `${idx + 1}. ${t}`;
-                // Default to "OS Basics by Aditi Ma'am" on first load so the user can test immediately
-                if (currentBatchKey === 'ignition-2.0' && currentSubjectObj.folder === '09-os' && idx === 6) {
+                if (selectedBatch === 'ignition-2.0' && subjObj.folder === '09-os' && idx === 6) {
                     opt.selected = true;
                 }
                 topicSelect.appendChild(opt);
@@ -660,21 +1058,25 @@
         }
 
         function handleTopicChange() {
+            const topicSelect = document.getElementById('setting-topic');
+            selectedTopicIndex = parseInt(topicSelect.value) || 0;
+            updateSetupSummaryBanner();
             fetchSelectedTopicJS();
         }
 
         function fetchSelectedTopicJS() {
-            const topicIdx = parseInt(document.getElementById('topic-select').value) || 0;
-            const rawTitle = currentSubjectObj.topics[topicIdx];
-            activeTopicTitle = rawTitle;
+            if (selectedBatch === 'custom') return;
+            const subjObj = REPO_CATALOG[selectedBatch].subjects[selectedSubjectIndex];
+            const topicTitle = subjObj.topics[selectedTopicIndex];
+            activeTestName = topicTitle;
 
-            const fileName = sanitizeFilename(topicIdx + 1, rawTitle);
-            const relativePath = `questions/${currentBatchKey}/${currentSubjectObj.folder}/${fileName}`;
+            const fileName = sanitizeFilename(selectedTopicIndex + 1, topicTitle);
+            const relPath = `questions/${selectedBatch}/${subjObj.folder}/${fileName}`;
 
-            document.getElementById('expected-path-badge').textContent = relativePath;
-            const statusEl = document.getElementById('repo-load-status');
-            statusEl.textContent = "Loading...";
-            statusEl.className = "font-bold text-amber-600 text-xs";
+            document.getElementById('repo-file-path').innerText = relPath;
+            const statusEl = document.getElementById('repo-file-status');
+            statusEl.innerText = "Loading...";
+            statusEl.className = "font-extrabold text-amber-600";
 
             const oldScript = document.getElementById('dynamic-questions-script');
             if (oldScript) oldScript.remove();
@@ -682,62 +1084,146 @@
 
             const script = document.createElement('script');
             script.id = 'dynamic-questions-script';
-            script.src = relativePath + "?v=" + Date.now();
+            script.src = relPath + "?t=" + Date.now();
 
             script.onload = () => {
                 if (typeof rawQuestions !== 'undefined' && Array.isArray(rawQuestions) && rawQuestions.length > 0) {
-                    window.rawQuestions = rawQuestions;
+                    // If the file is just the 1-question placeholder for OS Basics, use the full 25 built-in questions automatically!
+                    if (rawQuestions.length === 1 && topicTitle.toLowerCase().includes("os basics")) {
+                        window.rawQuestions = JSON.parse(JSON.stringify(BUILTIN_OS_BASICS));
+                    } else {
+                        window.rawQuestions = rawQuestions;
+                    }
                     isDataLoaded = true;
-                    statusEl.textContent = `✓ ${rawQuestions.length} Qs Ready`;
-                    statusEl.className = "font-bold text-emerald-600 text-xs";
-                    enableStartButton(`Start Test (${rawQuestions.length} Qs)`);
+                    statusEl.innerText = `✓ ${window.rawQuestions.length} Qs Ready`;
+                    statusEl.className = "font-extrabold text-emerald-600";
+                    enableStartButton(`Begin Assessment (${window.rawQuestions.length} Qs)`);
                 } else {
-                    handleFallbackOrError(rawTitle, relativePath);
+                    useFallbackOrWarn(topicTitle);
                 }
             };
 
             script.onerror = () => {
-                handleFallbackOrError(rawTitle, relativePath);
+                useFallbackOrWarn(topicTitle);
             };
 
             document.body.appendChild(script);
         }
 
-        function handleFallbackOrError(rawTitle, relativePath) {
-            const statusEl = document.getElementById('repo-load-status');
-            // Automatic fallback if user selected "OS Basics by Aditi Ma'am" before running setup_repo.py
-            if (rawTitle.toLowerCase().includes("os basics")) {
+        function useFallbackOrWarn(topicTitle) {
+            const statusEl = document.getElementById('repo-file-status');
+            if (topicTitle.toLowerCase().includes("os basics")) {
                 window.rawQuestions = JSON.parse(JSON.stringify(BUILTIN_OS_BASICS));
                 isDataLoaded = true;
-                statusEl.textContent = `✓ 25 Qs Ready (Built-in OS Basics)`;
-                statusEl.className = "font-bold text-emerald-600 text-xs";
-                enableStartButton(`Start Test (25 Qs)`);
+                statusEl.innerText = `✓ 25 Qs Ready (Built-in)`;
+                statusEl.className = "font-extrabold text-emerald-600";
+                enableStartButton(`Begin Assessment (25 Qs)`);
             } else {
                 isDataLoaded = false;
-                statusEl.textContent = `File not found yet`;
-                statusEl.className = "font-bold text-rose-500 text-xs";
-                disableStartButton(`Run setup_repo.py or Upload .js`);
+                statusEl.innerText = `File not found in repo`;
+                statusEl.className = "font-extrabold text-rose-600";
+                disableStartButton();
             }
         }
 
         function loadBuiltinOSBasics() {
+            closeOnboardingWizard();
             selectBatch('ignition-2.0');
-            document.getElementById('subject-select').value = 0;
+            document.getElementById('setting-subject').value = 0;
             handleSubjectChange();
-            document.getElementById('topic-select').value = 6;
+            document.getElementById('setting-topic').value = 6;
             window.rawQuestions = JSON.parse(JSON.stringify(BUILTIN_OS_BASICS));
-            activeTopicTitle = "OS Basics by Aditi Ma'am";
+            activeTestName = "OS Basics by Aditi Ma'am";
             isDataLoaded = true;
-            const statusEl = document.getElementById('repo-load-status');
-            statusEl.textContent = `✓ 25 Qs Ready (Built-in OS Basics)`;
-            statusEl.className = "font-bold text-emerald-600 text-xs";
-            enableStartButton(`Start OS Basics Test (25 Qs)`);
+            const statusEl = document.getElementById('repo-file-status');
+            statusEl.innerText = `✓ 25 Qs Ready (OS Basics)`;
+            statusEl.className = "font-extrabold text-emerald-600";
+            enableStartButton(`Begin Assessment (25 Qs)`);
         }
 
-        function handleLocalFileUpload(event) {
+        function enableStartButton(text) {
+            const startBtn = document.getElementById('start-btn');
+            startBtn.disabled = false;
+            startBtn.innerHTML = `<span>${text}</span> <i class="fa-solid fa-arrow-right text-sm"></i>`;
+        }
+
+        function disableStartButton() {
+            const startBtn = document.getElementById('start-btn');
+            startBtn.disabled = true;
+            startBtn.innerHTML = `<span>Select or Upload Valid .JS File</span> <i class="fa-solid fa-lock text-sm"></i>`;
+        }
+
+        function updateCandidateBadgesEverywhere() {
+            const avatarGradient = selectedCandidateTheme === 'rose'
+                ? 'from-rose-500 via-pink-500 to-purple-600'
+                : 'from-indigo-600 via-blue-600 to-cyan-500';
+
+            ['setup-candidate-avatar', 'top-right-avatar', 'sidebar-candidate-avatar'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.className = el.className.replace(/from-\S+\s+via-\S+\s+to-\S+|from-\S+\s+to-\S+/g, avatarGradient);
+                    el.innerText = selectedCandidateShort;
+                }
+            });
+
+            ['setup-candidate-name', 'top-right-candidate', 'candidate-name-label'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = selectedCandidate;
+            });
+
+            const reportCandBadge = document.getElementById('report-candidate-badge');
+            if (reportCandBadge) {
+                reportCandBadge.innerHTML = `<i class="fa-solid fa-user-graduate"></i> ${selectedCandidate}`;
+            }
+
+            updateSetupSummaryBanner();
+        }
+
+        function updateSetupSummaryBanner() {
+            let batchLabel = "Custom Local File";
+            let unitLabel = activeTestName;
+            if (selectedBatch !== 'custom') {
+                batchLabel = REPO_CATALOG[selectedBatch].label;
+                const subjObj = REPO_CATALOG[selectedBatch].subjects[selectedSubjectIndex];
+                unitLabel = `${subjObj.name} • ${subjObj.topics[selectedTopicIndex]}`;
+            }
+
+            const summaryEl = document.getElementById('setup-selection-summary');
+            if (summaryEl) summaryEl.innerText = `${batchLabel} • ${unitLabel}`;
+
+            const topRightPaperUnit = document.getElementById('top-right-paper-unit');
+            if (topRightPaperUnit) topRightPaperUnit.innerText = `${batchLabel} • ${unitLabel}`;
+
+            const sidebarUnitBadge = document.getElementById('sidebar-unit-badge');
+            if (sidebarUnitBadge) sidebarUnitBadge.innerText = unitLabel;
+        }
+
+        // ==================== 6. LOCAL UPLOAD & TIMER SETTINGS ====================
+        function setTimerMode(mode) {
+            testTimerMode = mode;
+            document.getElementById('mode-overall-btn').className = mode === 'overall'
+                ? "px-2.5 py-1 rounded-md font-bold bg-white text-brand-700 shadow-sm transition-all"
+                : "px-2.5 py-1 rounded-md font-semibold text-slate-600 hover:text-slate-800 transition-all";
+            document.getElementById('mode-perq-btn').className = mode === 'per-question'
+                ? "px-2.5 py-1 rounded-md font-bold bg-white text-brand-700 shadow-sm transition-all"
+                : "px-2.5 py-1 rounded-md font-semibold text-slate-600 hover:text-slate-800 transition-all";
+        }
+
+        function selectTimeBox(seconds) {
+            timeLimitPerQ = seconds;
+            document.querySelectorAll('#time-boxes-container .time-box').forEach(box => {
+                box.classList.toggle('active', parseInt(box.getAttribute('data-time')) === seconds);
+            });
+        }
+
+        function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-            activeTopicTitle = file.name.replace(/\.js$/i, '');
+
+            activeTestName = file.name.replace(/\.js$/i, '');
+            document.getElementById('file-name').innerText = file.name;
+            document.getElementById('file-name').className = 'text-xs font-bold text-brand-700 truncate max-w-[150px]';
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
@@ -748,53 +1234,45 @@
 
                     if (Array.isArray(window.rawQuestions) && window.rawQuestions.length > 0) {
                         isDataLoaded = true;
-                        document.getElementById('local-file-status').textContent = `✓ ${window.rawQuestions.length} Qs`;
-                        document.getElementById('local-file-status').className = "text-xs font-bold text-emerald-600";
-                        enableStartButton(`Start Test (${window.rawQuestions.length} Qs)`);
+                        document.getElementById('file-count').innerText = `${window.rawQuestions.length} Questions Ready`;
+                        document.getElementById('file-count').classList.remove('hidden');
+                        enableStartButton(`Begin Assessment (${window.rawQuestions.length} Qs)`);
                     } else {
                         throw new Error("Invalid format");
                     }
-                } catch (err) {
-                    showModal({ title: "Invalid .js File", message: "Could not find a valid 'rawQuestions' array inside the selected file.", type: "error" });
+                } catch (error) {
+                    showModal({ title: "Invalid File", message: "No valid 'rawQuestions' array found inside this .js file.", type: "error" });
+                    resetUploadState();
                 }
             };
             reader.readAsText(file);
         }
 
-        function enableStartButton(label) {
-            const btn = document.getElementById('start-btn');
-            btn.disabled = false;
-            btn.innerHTML = `<span>${label}</span> <i class="fa-solid fa-play text-xs"></i>`;
+        function resetUploadState() {
+            isDataLoaded = false;
+            document.getElementById('file-name').innerText = 'No file selected';
+            document.getElementById('file-count').classList.add('hidden');
+            disableStartButton();
         }
 
-        function disableStartButton(label) {
-            const btn = document.getElementById('start-btn');
-            btn.disabled = true;
-            btn.innerHTML = `<span>${label}</span> <i class="fa-solid fa-lock text-xs"></i>`;
-        }
-
-        // ==================== 5. TIMER & TEST ENGINE ====================
-        function setTimerMode(mode) {
-            testTimerMode = mode;
-            document.getElementById('mode-overall-btn').className = mode === 'overall'
-                ? "px-2.5 py-1 rounded-md font-bold bg-white text-brand-700 shadow-sm"
-                : "px-2.5 py-1 rounded-md font-semibold text-slate-600";
-            document.getElementById('mode-perq-btn').className = mode === 'per-question'
-                ? "px-2.5 py-1 rounded-md font-bold bg-white text-brand-700 shadow-sm"
-                : "px-2.5 py-1 rounded-md font-semibold text-slate-600";
-        }
-
-        function selectTimeBox(seconds) {
-            timeLimitPerQ = seconds;
-            document.querySelectorAll('#time-boxes-container .time-box').forEach(box => {
-                box.classList.toggle('active', parseInt(box.getAttribute('data-time')) === seconds);
-            });
+        // ==================== 7. TEST ENGINE & PALETTE ====================
+        function categorizeTopic(qObj) {
+            if (qObj.topic && typeof qObj.topic === 'string' && qObj.topic.trim() !== '') return qObj.topic.trim();
+            if (selectedBatch !== 'custom') {
+                return REPO_CATALOG[selectedBatch].subjects[selectedSubjectIndex].name;
+            }
+            return activeTestName;
         }
 
         function startTest() {
             if (!isDataLoaded || !window.rawQuestions) return;
 
             questions = JSON.parse(JSON.stringify(window.rawQuestions));
+            questions.forEach((q, i) => {
+                q.originalId = i;
+                q.topic = categorizeTopic(q);
+            });
+
             if (document.getElementById('setting-shuffle').checked) {
                 for (let i = questions.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -807,20 +1285,452 @@
             for (let i = 0; i < questions.length; i++) statuses[i] = 'not-visited';
             statuses[0] = 'not-answered';
 
-            const batchLabel = currentBatchKey === 'custom' ? 'Custom Test' : REPO_CATALOG[currentBatchKey].label;
-            const subjName = currentBatchKey === 'custom' ? 'Local File' : currentSubjectObj.name;
+            const batchLabel = selectedBatch === 'custom' ? 'Custom Upload' : REPO_CATALOG[selectedBatch].label;
+            const subjName = selectedBatch === 'custom' ? activeTestName : REPO_CATALOG[selectedBatch].subjects[selectedSubjectIndex].name;
 
-            document.getElementById('header-batch-badge').textContent = batchLabel;
-            document.getElementById('header-unit-title').textContent = subjName;
-            document.getElementById('test-title-header').textContent = activeTopicTitle;
+            updateCandidateBadgesEverywhere();
+            document.getElementById('header-paper-badge').innerText = batchLabel;
+            document.getElementById('header-unit-title').innerText = subjName;
+            document.getElementById('test-title-header').innerText = activeTestName;
+            document.getElementById('candidate-paper-label').innerText = `${batchLabel} • ${questions.length} Qs`;
+            document.getElementById('sidebar-unit-badge').innerText = activeTestName;
 
-            document.getElementById('report-paper-badge').textContent = batchLabel;
-            document.getElementById('report-unit-badge').textContent = subjName;
-            document.getElementById('report-title').textContent = activeTopicTitle;
+            document.getElementById('report-paper-badge').innerText = batchLabel;
+            document.getElementById('report-unit-badge').innerText = subjName;
+            document.getElementById('report-title').innerText = `Topic: ${activeTestName} • Attempted by ${selectedCandidate}`;
 
             totalTimeSpent = 0;
             const timerBadge = document.getElementById('timer-badge-container');
+
             if (timeLimitPerQ > 0) {
                 timeRemaining = testTimerMode === 'overall' ? timeLimitPerQ * questions.length : timeLimitPerQ;
-                timerBadge.className = "flex items-center gap-1.5 bg-red-50 text-red-600 px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-red-200 font-mono font-bold text-xs sm:text-base";
-                document.get
+                timerBadge.className = "flex items-center gap-1.5 bg-red-50 text-red-600 px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-red-100 font-mono font-bold text-xs sm:text-base shadow-sm";
+                document.getElementById('timer-icon').className = "fa-regular fa-clock animate-pulse";
+                document.getElementById('time-text').innerText = formatTime(timeRemaining);
+            } else {
+                timeRemaining = -1;
+                timerBadge.className = "flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-emerald-200 font-sans font-bold text-xs shadow-sm";
+                document.getElementById('timer-icon').className = "fa-solid fa-infinity";
+                document.getElementById('time-text').innerText = "No Limit";
+            }
+
+            document.getElementById('setup-view').classList.add('hidden');
+            document.getElementById('test-view').classList.remove('hidden');
+
+            renderPalette();
+            loadQuestion(0);
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(tickTimer, 1000);
+        }
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        function tickTimer() {
+            totalTimeSpent++;
+            if (timeRemaining === -1) return;
+
+            timeRemaining--;
+            document.getElementById('time-text').innerText = formatTime(Math.max(0, timeRemaining));
+
+            if (testTimerMode === 'per-question') {
+                const ind = document.getElementById('q-timer-indicator');
+                ind.innerText = `${timeRemaining}s left`;
+                ind.classList.remove('hidden');
+            }
+
+            if (timeRemaining <= 0) {
+                if (testTimerMode === 'per-question' && currentQ < questions.length - 1) {
+                    loadQuestion(currentQ + 1);
+                } else {
+                    clearInterval(timerInterval);
+                    triggerWaitingAndSubmit();
+                }
+            }
+        }
+
+        function toggleMobilePalette(force) {
+            const drawer = document.getElementById('palette-drawer');
+            const backdrop = document.getElementById('palette-backdrop');
+            const isOpen = !drawer.classList.contains('translate-y-full');
+            const nextState = force !== undefined ? force : !isOpen;
+
+            if (nextState) {
+                drawer.classList.remove('translate-y-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                drawer.classList.add('translate-y-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        function renderPalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `palette-btn w-full aspect-square rounded-xl shadow-sm flex items-center justify-center font-bold text-xs sm:text-sm status-${statuses[i]} ${i === currentQ ? 'active' : ''}`;
+                btn.innerText = i + 1;
+                btn.onclick = () => {
+                    jumpToQuestion(i);
+                    if (window.innerWidth < 1024) toggleMobilePalette(false);
+                };
+                grid.appendChild(btn);
+            }
+            updateStatusCountsAndProgress();
+        }
+
+        function updateStatusCountsAndProgress() {
+            const vals = Object.values(statuses);
+            const countAns = vals.filter(s => s === 'answered').length;
+            const countNotAns = vals.filter(s => s === 'not-answered').length;
+            const countNotVis = vals.filter(s => s === 'not-visited').length;
+            const countMarked = vals.filter(s => s === 'marked').length;
+            const countAnsMarked = vals.filter(s => s === 'answered-marked').length;
+
+            document.getElementById('count-answered').innerText = countAns;
+            document.getElementById('count-not-answered').innerText = countNotAns;
+            document.getElementById('count-not-visited').innerText = countNotVis;
+            document.getElementById('count-marked').innerText = countMarked;
+            document.getElementById('count-answered-marked').innerText = countAnsMarked;
+
+            const totalAnswered = countAns + countAnsMarked;
+            const percentage = questions.length > 0 ? (totalAnswered / questions.length) * 100 : 0;
+            document.getElementById('side-progress-text').innerText = `${totalAnswered}/${questions.length}`;
+            document.getElementById('mobile-palette-btn-text').innerText = `${totalAnswered}/${questions.length}`;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        }
+
+        function loadQuestion(index) {
+            currentQ = index;
+            if (statuses[currentQ] === 'not-visited') {
+                statuses[currentQ] = answers[currentQ] !== undefined ? 'answered' : 'not-answered';
+            }
+
+            if (testTimerMode === 'per-question' && timeLimitPerQ > 0) {
+                timeRemaining = timeLimitPerQ;
+                const ind = document.getElementById('q-timer-indicator');
+                ind.innerText = `${timeRemaining}s left`;
+                ind.classList.remove('hidden');
+            } else {
+                document.getElementById('q-timer-indicator').classList.add('hidden');
+            }
+
+            document.getElementById('q-number-badge').innerText = `Question ${currentQ + 1} of ${questions.length}`;
+            document.getElementById('q-text').innerHTML = questions[currentQ].q;
+            document.getElementById('prev-btn').disabled = (currentQ === 0 || (testTimerMode === 'per-question' && timeLimitPerQ > 0));
+
+            const primaryBtn = document.getElementById('primary-next-btn');
+            if (currentQ === questions.length - 1) {
+                primaryBtn.className = "col-span-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3 sm:px-8 rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 text-xs sm:text-base sm:ml-auto";
+                primaryBtn.innerHTML = `<span>Save & Submit</span> <i class="fa-solid fa-check-double"></i>`;
+            } else {
+                primaryBtn.className = "col-span-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 px-3 sm:px-8 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 text-xs sm:text-base sm:ml-auto";
+                primaryBtn.innerHTML = `<span>Save & Next</span> <i class="fa-solid fa-angle-right"></i>`;
+            }
+
+            const optsContainer = document.getElementById('options-container');
+            optsContainer.innerHTML = '';
+            const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+            questions[currentQ].opts.forEach((optText, i) => {
+                const optDiv = document.createElement('div');
+                const isSelected = answers[currentQ] === i;
+                optDiv.className = `option-card rounded-xl p-3.5 sm:p-4 flex gap-3.5 items-start cursor-pointer border ${isSelected ? 'selected' : 'border-slate-200 bg-white'}`;
+                optDiv.onclick = () => selectOption(i);
+                optDiv.innerHTML = `
+                    <div class="mt-0.5 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-lg font-bold text-xs border-2 ${isSelected ? 'border-brand-600 bg-brand-600 text-white' : 'border-slate-300 text-slate-500 bg-slate-50'} shrink-0">
+                        ${optionLabels[i] || (i + 1)}
+                    </div>
+                    <div class="text-slate-700 font-medium leading-relaxed text-sm sm:text-base flex-grow">${optText}</div>
+                `;
+                optsContainer.appendChild(optDiv);
+            });
+
+            renderPalette();
+            document.getElementById('q-scroll-area').scrollTop = 0;
+        }
+
+        function selectOption(index) {
+            answers[currentQ] = index;
+            statuses[currentQ] = (statuses[currentQ] === 'marked' || statuses[currentQ] === 'answered-marked') ? 'answered-marked' : 'answered';
+            loadQuestion(currentQ);
+        }
+
+        function clearResponse() {
+            delete answers[currentQ];
+            statuses[currentQ] = 'not-answered';
+            loadQuestion(currentQ);
+        }
+
+        function handlePrimaryAction() {
+            if (answers[currentQ] !== undefined) statuses[currentQ] = 'answered';
+            else if (statuses[currentQ] !== 'marked') statuses[currentQ] = 'not-answered';
+
+            renderPalette();
+            if (currentQ === questions.length - 1) {
+                triggerWaitingAndSubmit();
+            } else {
+                loadQuestion(currentQ + 1);
+            }
+        }
+
+        function markAndNext() {
+            statuses[currentQ] = answers[currentQ] !== undefined ? 'answered-marked' : 'marked';
+            if (currentQ < questions.length - 1) loadQuestion(currentQ + 1);
+            else renderPalette();
+        }
+
+        function goPrev() {
+            if (testTimerMode === 'per-question' && timeLimitPerQ > 0) return;
+            if (currentQ > 0) loadQuestion(currentQ - 1);
+        }
+
+        function jumpToQuestion(index) {
+            if (testTimerMode === 'per-question' && timeLimitPerQ > 0) {
+                showModal({ title: "Navigation Restricted", message: "Jumping between questions is disabled in Strict Per-Question Timer mode.", type: "warning" });
+                return;
+            }
+            loadQuestion(index);
+        }
+
+        function confirmExitToSetup() {
+            showModal({
+                title: "Exit Assessment?",
+                message: "Return to the setup screen? Current test progress will be lost.",
+                type: "warning",
+                confirmText: "Yes, Exit",
+                cancelText: "Stay",
+                onConfirm: () => resetToSetup()
+            });
+        }
+
+        function confirmSubmit() {
+            const answeredCount = Object.keys(answers).length;
+            showModal({
+                title: "Submit Assessment?",
+                message: `You have answered ${answeredCount} out of ${questions.length} questions. Proceed to final submission?`,
+                type: "confirm",
+                confirmText: "Yes, Submit Now",
+                cancelText: "Continue Test",
+                onConfirm: () => triggerWaitingAndSubmit()
+            });
+        }
+
+        function triggerWaitingAndSubmit() {
+            clearInterval(timerInterval);
+            clearInterval(waitingInterval);
+            toggleMobilePalette(false);
+
+            document.getElementById('test-view').classList.add('hidden');
+            const waitingView = document.getElementById('waiting-view');
+            waitingView.classList.remove('hidden');
+            waitingView.classList.add('flex');
+
+            const randomQuote = consistencyQuotes[Math.floor(Math.random() * consistencyQuotes.length)];
+            document.getElementById('motivational-quote-text').innerText = `"${randomQuote.quote}"`;
+            document.getElementById('motivational-quote-author').innerText = randomQuote.theme;
+
+            const totalWaitSeconds = 20;
+            let waitRemaining = totalWaitSeconds;
+            const circumference = 2 * Math.PI * 70;
+            const circleEl = document.getElementById('waiting-circle');
+            const secondsTextEl = document.getElementById('waiting-seconds');
+
+            circleEl.style.strokeDashoffset = '0';
+            secondsTextEl.innerText = waitRemaining;
+
+            waitingInterval = setInterval(() => {
+                waitRemaining--;
+                if (waitRemaining >= 0) {
+                    secondsTextEl.innerText = waitRemaining;
+                    const offset = Math.min(circumference, circumference * ((totalWaitSeconds - waitRemaining) / totalWaitSeconds));
+                    circleEl.style.strokeDashoffset = `${offset}`;
+                }
+                if (waitRemaining <= 0) {
+                    skipWaitingNow();
+                }
+            }, 1000);
+        }
+
+        function skipWaitingNow() {
+            clearInterval(waitingInterval);
+            const waitingView = document.getElementById('waiting-view');
+            waitingView.classList.add('hidden');
+            waitingView.classList.remove('flex');
+            renderFinalResults();
+        }
+
+        function renderFinalResults() {
+            document.getElementById('results-view').classList.remove('hidden');
+
+            let correct = 0, incorrect = 0, attempted = 0;
+            let topicStats = {};
+            const reviewContainer = document.getElementById('review-container');
+            reviewContainer.innerHTML = '';
+            const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+            questions.forEach((q, i) => {
+                const userAns = answers[i];
+                let isCorrect = false;
+                let statusCategory = 'unattempted';
+
+                if (!topicStats[q.topic]) topicStats[q.topic] = { total: 0, correct: 0, incorrect: 0, omitted: 0 };
+                topicStats[q.topic].total++;
+
+                if (userAns !== undefined) {
+                    attempted++;
+                    if (userAns === q.ans) {
+                        correct++;
+                        isCorrect = true;
+                        statusCategory = 'correct';
+                        topicStats[q.topic].correct++;
+                    } else {
+                        incorrect++;
+                        statusCategory = 'incorrect';
+                        topicStats[q.topic].incorrect++;
+                    }
+                } else {
+                    topicStats[q.topic].omitted++;
+                }
+
+                let optsHTML = '';
+                q.opts.forEach((optText, optIdx) => {
+                    let optClass = 'py-3 px-4 rounded-xl border mb-2 flex items-start gap-3 text-xs sm:text-sm ';
+                    let badge = `<span class="w-6 h-6 rounded-md flex items-center justify-center font-bold text-xs shrink-0 bg-slate-100 text-slate-600">${optionLabels[optIdx] || (optIdx + 1)}</span>`;
+
+                    if (optIdx === q.ans) {
+                        optClass += 'bg-emerald-100/80 border-emerald-300 text-emerald-900 font-bold';
+                        badge = `<span class="w-6 h-6 rounded-md flex items-center justify-center font-bold text-xs shrink-0 bg-emerald-600 text-white"><i class="fa-solid fa-check"></i></span>`;
+                    } else if (optIdx === userAns && !isCorrect) {
+                        optClass += 'bg-red-100/80 border-red-300 text-red-900 line-through';
+                        badge = `<span class="w-6 h-6 rounded-md flex items-center justify-center font-bold text-xs shrink-0 bg-red-600 text-white"><i class="fa-solid fa-xmark"></i></span>`;
+                    } else {
+                        optClass += 'bg-white border-slate-200 text-slate-600';
+                    }
+                    optsHTML += `<div class="${optClass}">${badge} <div class="pt-0.5 leading-relaxed">${optText}</div></div>`;
+                });
+
+                const card = document.createElement('div');
+                card.setAttribute('data-review-status', statusCategory);
+                card.className = `review-card rounded-2xl border ${isCorrect ? 'border-emerald-200 bg-emerald-50/20' : (userAns !== undefined ? 'border-red-200 bg-red-50/20' : 'border-amber-200 bg-amber-50/20')} overflow-hidden shadow-sm`;
+                card.innerHTML = `
+                    <div class="px-5 py-3.5 flex flex-wrap justify-between items-center gap-2 border-b border-black/5 bg-white/70">
+                        <div class="flex items-center gap-2.5">
+                            <span class="font-extrabold text-slate-700 bg-white px-3 py-1 rounded-lg border border-slate-200 text-xs sm:text-sm">Q ${i + 1}</span>
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-slate-100 text-slate-700">${q.topic}</span>
+                        </div>
+                        <span class="font-bold px-3 py-1 rounded-full text-xs ${isCorrect ? 'bg-emerald-100 text-emerald-700' : (userAns !== undefined ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700')}">
+                            ${isCorrect ? '+2 Marks (Correct)' : (userAns !== undefined ? '0 Marks (Incorrect)' : '0 Marks (Unattempted)')}
+                        </span>
+                    </div>
+                    <div class="p-5 sm:p-6">
+                        <div class="text-sm sm:text-lg text-slate-800 font-semibold mb-4 leading-relaxed">${q.q}</div>
+                        <div class="mb-4">${optsHTML}</div>
+                        <div class="bg-blue-50/70 border border-blue-200/80 rounded-xl p-4">
+                            <div class="text-brand-800 font-bold text-xs sm:text-sm mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-lightbulb text-amber-500"></i> Official Explanation
+                            </div>
+                            <div class="text-slate-700 text-xs sm:text-sm leading-relaxed">${q.exp || 'Correct Answer is Option ' + optionLabels[q.ans]}</div>
+                        </div>
+                    </div>
+                `;
+                reviewContainer.appendChild(card);
+            });
+
+            const totalScore = correct * 2;
+            const maxScore = questions.length * 2;
+            const percent = maxScore > 0 ? ((totalScore / maxScore) * 100).toFixed(1) : '0.0';
+            const accuracy = attempted > 0 ? ((correct / attempted) * 100).toFixed(1) : '0.0';
+
+            document.getElementById('res-score').innerHTML = `${totalScore}<span class="text-xl text-slate-400 font-bold">/${maxScore}</span>`;
+            document.getElementById('res-percent').innerText = `${percent}% Score`;
+            document.getElementById('res-accuracy').innerText = `${accuracy}%`;
+            document.getElementById('res-attempted').innerText = `${attempted}/${questions.length}`;
+            document.getElementById('res-correct').innerText = `${correct} Correct`;
+            document.getElementById('res-wrong').innerText = `${incorrect} Wrong`;
+            document.getElementById('res-time').innerText = formatTime(totalTimeSpent);
+            document.getElementById('res-avg-time').innerText = `Avg: ${questions.length ? Math.round(totalTimeSpent / questions.length) : 0}s / Question`;
+
+            const topicContainer = document.getElementById('topic-analysis-container');
+            topicContainer.innerHTML = '';
+            Object.keys(topicStats).forEach(topic => {
+                const stat = topicStats[topic];
+                const topicAttempted = stat.correct + stat.incorrect;
+                const accuracyNum = topicAttempted > 0 ? (stat.correct / topicAttempted) * 100 : 0;
+                topicContainer.innerHTML += `
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex justify-between items-end mb-2">
+                            <div class="font-bold text-slate-800 text-sm">${topic}</div>
+                            <div class="text-xs font-bold text-slate-600">${stat.correct}/${stat.total} Correct</div>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2.5 flex overflow-hidden">
+                            <div class="bg-emerald-500 h-2.5" style="width: ${(stat.correct / stat.total) * 100}%"></div>
+                            <div class="bg-red-400 h-2.5" style="width: ${(stat.incorrect / stat.total) * 100}%"></div>
+                        </div>
+                        <div class="flex justify-between mt-2 text-[11px] text-slate-500 font-semibold">
+                            <span>Accuracy: ${accuracyNum.toFixed(0)}%</span>
+                            <span>Right: ${stat.correct} • Wrong: ${stat.incorrect} • Skipped: ${stat.omitted}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            window.scrollTo(0, 0);
+        }
+
+        function filterReview(filterType) {
+            document.querySelectorAll('.review-filter-btn').forEach(btn => {
+                btn.className = btn.getAttribute('data-filter') === filterType
+                    ? "review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-brand-600 text-white shadow-sm"
+                    : "review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200";
+            });
+            document.querySelectorAll('.review-card').forEach(card => {
+                const status = card.getAttribute('data-review-status');
+                card.classList.toggle('hidden', filterType !== 'all' && status !== filterType);
+            });
+        }
+
+        function resetToSetup() {
+            clearInterval(timerInterval);
+            clearInterval(waitingInterval);
+            document.getElementById('results-view').classList.add('hidden');
+            document.getElementById('test-view').classList.add('hidden');
+            document.getElementById('waiting-view').classList.add('hidden');
+            document.getElementById('setup-view').classList.remove('hidden');
+        }
+
+        function showModal({ title, message, type = 'info', confirmText = 'Okay', cancelText = null, onConfirm = null }) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            const cancelBtn = document.getElementById('modal-cancel-btn');
+            confirmBtn.innerText = confirmText;
+
+            if (cancelText) {
+                cancelBtn.innerText = cancelText;
+                cancelBtn.classList.remove('hidden');
+                cancelBtn.onclick = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); };
+            } else {
+                cancelBtn.classList.add('hidden');
+            }
+
+            confirmBtn.onclick = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                if (typeof onConfirm === 'function') onConfirm();
+            };
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    </script>
+</body>
+</html>
