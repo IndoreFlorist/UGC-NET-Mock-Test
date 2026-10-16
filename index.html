@@ -411,8 +411,11 @@
                 <!-- STEP 4 (FOR GITHUB REPO BATCHES): CHOOSE SPECIFIC TOPIC (.JS FILE) -->
                 <div id="wizard-step-4" class="step-panel hidden space-y-4">
                     <div class="flex flex-wrap items-center justify-between gap-2 pb-1">
-                        <p class="text-xs md:text-sm text-slate-500 font-semibold">Select the Topic (`.js` file) to load or publish to GitHub:</p>
-                        <span id="wizard-selected-subject-pill" class="text-xs font-extrabold px-3 py-1 rounded-full bg-indigo-100 text-indigo-800">Unit V: Operating System</span>
+                        <div class="flex items-center gap-2">
+                            <p class="text-xs md:text-sm text-slate-500 font-semibold">Select the Topic (`.js` file) to load or publish to GitHub:</p>
+                            <span id="wizard-subject-progress-pill" class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">1/7 Uploaded</span>
+                        </div>
+                        <span id="wizard-selected-subject-pill" class="text-xs font-extrabold px-3 py-1 rounded-full bg-indigo-100 text-indigo-800">Operating System</span>
                     </div>
                     <div id="wizard-topics-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[52vh] overflow-y-auto pr-1"></div>
                 </div>
@@ -537,15 +540,15 @@
                     <div class="hidden sm:flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
                         <i class="fa-brands fa-github text-brand-300 text-lg w-6 text-center"></i>
                         <div>
-                            <div class="text-xs font-bold text-white">1-Click GitHub Publisher</div>
-                            <div class="text-[11px] text-brand-200">Auto-renames & pushes your .JS files</div>
+                            <div class="text-xs font-bold text-white">Live Repo Sync</div>
+                            <div class="text-[11px] text-brand-200">Uploaded topics turn green automatically</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="relative z-10 text-xs text-brand-200/70 flex items-center justify-between border-t border-white/10 pt-4">
                     <span>50/50 Laptop & Smartphone Pro UI</span>
-                    <span class="font-semibold text-brand-200">v4.0 Auto-Publish</span>
+                    <span class="font-semibold text-brand-200">v4.2 Live-Track</span>
                 </div>
                 
                 <!-- Decorative Blur Circles -->
@@ -621,7 +624,10 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">3. Select Topic (.js File)</label>
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500">3. Select Topic (.js File)</label>
+                                        <span id="setup-subject-uploaded-count" class="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">1/7 Ready</span>
+                                    </div>
                                     <div class="relative">
                                         <select id="setting-topic" onchange="handleTopicChange()" class="w-full appearance-none bg-white border border-slate-300 text-slate-800 font-bold text-xs sm:text-sm py-3 px-3.5 pr-9 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"></select>
                                         <i class="fa-solid fa-chevron-down text-xs text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
@@ -1714,7 +1720,54 @@
             }
         ];
 
-        // ==================== 4. APPLICATION STATE ====================
+        // ==================== 4. APPLICATION STATE & LIVE TOPIC STATUS CACHE ====================
+        const TOPIC_STATUS_STORAGE_KEY = 'jrf_uploaded_topics_v1';
+        let uploadedTopicsMap = loadUploadedTopicsMap();
+
+        function loadUploadedTopicsMap() {
+            let map = {};
+            try {
+                const raw = localStorage.getItem(TOPIC_STATUS_STORAGE_KEY);
+                if (raw) map = JSON.parse(raw);
+            } catch (e) {}
+            // Always ensure built-in 1. OS Basics (25 Qs) is marked ready
+            map['questions/ignition-2.0/09-os/1__OS_Basics_by_Aditi_Ma_am.js'] = 25;
+            return map;
+        }
+
+        function markTopicAsUploaded(relPath, qCount) {
+            uploadedTopicsMap[relPath] = qCount;
+            try {
+                localStorage.setItem(TOPIC_STATUS_STORAGE_KEY, JSON.stringify(uploadedTopicsMap));
+            } catch (e) {}
+        }
+
+        // Automatically probes a topic .js file on GitHub Pages (or GitHub API) to detect if it exists & how many questions it has!
+        async function probeTopicFileStatus(batchKey, folder, idx, topicTitle) {
+            const fname = sanitizeFilename(idx + 1, topicTitle);
+            const relPath = `questions/${batchKey}/${folder}/${fname}`;
+
+            try {
+                // 1. Try direct fetch from GitHub Pages
+                const res = await fetch(relPath + "?probe=" + Date.now(), { cache: "no-store" });
+                if (res.ok) {
+                    const code = await res.text();
+                    const fn = new Function(code + "\n;return typeof rawQuestions !== 'undefined' ? rawQuestions : null;");
+                    const arr = fn();
+                    if (Array.isArray(arr) && arr.length > 0) {
+                        markTopicAsUploaded(relPath, arr.length);
+                        return arr.length;
+                    }
+                }
+            } catch (e) {}
+
+            // 2. Fallback: return cached count if recently published via 1-Click Publisher
+            if (uploadedTopicsMap[relPath]) {
+                return uploadedTopicsMap[relPath];
+            }
+            return 0;
+        }
+
         let selectedCandidate = 'Future JRF Tushar';
         let selectedCandidateShort = 'FT';
         let selectedCandidateTheme = 'indigo';
@@ -1750,7 +1803,6 @@
         // ==================== 5. 1-CLICK GITHUB AUTO-PUBLISHER FUNCTIONS ====================
         function openGitHubPublisher() {
             if (selectedBatch === 'custom') {
-                // Switch to Ignition 2.0 if user was on Custom tab
                 selectBatch('ignition-2.0');
             }
             const batchObj = REPO_CATALOG[selectedBatch];
@@ -1763,14 +1815,12 @@
             document.getElementById('pub-topic-label').innerText = `${selectedTopicIndex + 1}. ${topicTitle}`;
             document.getElementById('pub-target-path').innerText = targetPath;
 
-            // Load saved GitHub Repo & Token from localStorage
             const savedRepo = localStorage.getItem('jrf_gh_repo') || 'IndoreFlorist/UGC-NET-Mock-Test';
             const savedToken = localStorage.getItem('jrf_gh_token') || '';
             document.getElementById('pub-repo-input').value = savedRepo;
             document.getElementById('pub-token-input').value = savedToken;
             document.getElementById('pub-token-saved-badge').classList.toggle('hidden', !savedToken);
 
-            // Reset status box
             const statusBox = document.getElementById('pub-status-box');
             statusBox.classList.add('hidden');
             statusBox.classList.remove('flex');
@@ -1873,7 +1923,6 @@
                 return;
             }
 
-            // Save repo & token in browser localStorage for future 1-click uploads
             localStorage.setItem('jrf_gh_repo', repo);
             localStorage.setItem('jrf_gh_token', token);
             document.getElementById('pub-token-saved-badge').classList.remove('hidden');
@@ -1889,7 +1938,6 @@
                     'Accept': 'application/vnd.github+json'
                 };
 
-                // 1. Check if the file already exists on GitHub to get its SHA
                 let existingSha = null;
                 const getRes = await fetch(apiUrl, { method: 'GET', headers });
                 if (getRes.ok) {
@@ -1897,7 +1945,6 @@
                     existingSha = existingData.sha;
                 }
 
-                // 2. Encode UTF-8 string cleanly to Base64
                 const utf8Bytes = new TextEncoder().encode(code);
                 let binaryStr = "";
                 for (let i = 0; i < utf8Bytes.length; i++) {
@@ -1905,7 +1952,6 @@
                 }
                 const base64Content = btoa(binaryStr);
 
-                // 3. Push file via PUT
                 const putBody = {
                     message: `Published ${parsedArr.length} Qs to ${targetPath} via 1-Click Mock Portal`,
                     content: base64Content
@@ -1923,7 +1969,14 @@
                     throw new Error(errJson.message || `GitHub API Error (${putRes.status})`);
                 }
 
-                // Load the questions immediately into the live session so the user doesn't even have to wait for GitHub Pages cache!
+                // Immediately mark this topic as uploaded so it turns GREEN with its exact question count!
+                markTopicAsUploaded(targetPath, parsedArr.length);
+                refreshSetupTopicDropdownLabels();
+                if (currentWizardStep === 4) {
+                    renderWizardTopics();
+                }
+
+                // Also load into live memory immediately
                 window.rawQuestions = parsedArr;
                 isDataLoaded = true;
                 const statusEl = document.getElementById('repo-file-status');
@@ -1931,10 +1984,10 @@
                 statusEl.className = "font-extrabold text-emerald-600";
                 enableStartButton(`Begin Assessment (${parsedArr.length} Qs)`);
 
-                setPublisherStatus(`Success! Automatically renamed & saved to GitHub (${parsedArr.length} Qs). You can start the test right now!`, "success");
+                setPublisherStatus(`Success! Automatically renamed & saved to GitHub (${parsedArr.length} Qs). Card is now Green!`, "success");
                 setTimeout(() => {
                     closeGitHubPublisher();
-                }, 1400);
+                }, 1300);
             } catch (error) {
                 setPublisherStatus(`Upload failed: ${error.message}. Check your token permissions ('repo' scope).`, "error");
             } finally {
@@ -2078,6 +2131,13 @@
             ];
 
             batchObj.subjects.forEach((subj, idx) => {
+                // Count how many topics in this subject are already known to be uploaded
+                let readyCount = 0;
+                subj.topics.forEach((t, tIdx) => {
+                    const p = `questions/${selectedBatch}/${subj.folder}/${sanitizeFilename(tIdx + 1, t)}`;
+                    if (uploadedTopicsMap[p] > 0) readyCount++;
+                });
+
                 const palette = colorPalettes[idx % colorPalettes.length];
                 const [gradFrom, gradTo, borderCol, hoverBorder, bgLight] = palette.split(' ');
                 const btn = document.createElement('button');
@@ -2089,13 +2149,20 @@
                     setWizardStep(4);
                 };
 
+                const readyBadgeHTML = readyCount > 0
+                    ? `<span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full shrink-0">${readyCount}/${subj.topics.length} Ready</span>`
+                    : `<span class="text-[10px] font-semibold text-slate-400 shrink-0">${subj.topics.length} Sessions</span>`;
+
                 btn.innerHTML = `
                     <div class="w-11 h-11 rounded-xl bg-gradient-to-tr ${gradFrom} ${gradTo} text-white flex items-center justify-center text-base shadow-sm shrink-0 group-hover:scale-110 transition-transform">
                         <i class="fa-solid ${subj.icon || 'fa-layer-group'}"></i>
                     </div>
                     <div class="min-w-0 flex-grow">
-                        <div class="text-xs sm:text-sm font-extrabold text-slate-800 group-hover:text-indigo-700 transition-colors leading-snug">${subj.name}</div>
-                        <div class="text-[10px] font-semibold text-slate-500 mt-0.5">${subj.topics.length} Sessions (${subj.folder})</div>
+                        <div class="text-xs sm:text-sm font-extrabold text-slate-800 group-hover:text-indigo-700 transition-colors leading-snug truncate">${subj.name}</div>
+                        <div class="flex items-center gap-2 mt-1">
+                            ${readyBadgeHTML}
+                            <span class="text-[10px] font-mono text-slate-400">(${subj.folder})</span>
+                        </div>
                     </div>
                     <i class="fa-solid fa-circle-chevron-right text-slate-300 group-hover:text-indigo-600 transition-colors"></i>
                 `;
@@ -2103,38 +2170,91 @@
             });
         }
 
+        function createWizardTopicCardHTML(idx, topicTitle, fname, qCount) {
+            const isReady = qCount > 0;
+            const badgeHTML = isReady
+                ? `<span class="text-[9px] font-extrabold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-md shrink-0 flex items-center gap-1"><i class="fa-solid fa-check text-[8px]"></i> ${qCount} QS</span>`
+                : `<span class="text-[9px] font-bold uppercase bg-slate-200/70 text-slate-500 px-1.5 py-0.5 rounded shrink-0">Pending</span>`;
+
+            const publishBtnHTML = isReady
+                ? `<button type="button" onclick="selectTopicFromWizard(${idx}, true)" title="Update .JS File on GitHub" class="shrink-0 px-2.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[10px] flex items-center gap-1 shadow-xs transition-colors">
+                       <i class="fa-solid fa-rotate"></i> <span>Update</span>
+                   </button>`
+                : `<button type="button" onclick="selectTopicFromWizard(${idx}, true)" title="1-Click Upload .JS to GitHub for this Topic" class="shrink-0 px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-bold text-[10px] flex items-center gap-1 shadow-xs transition-colors">
+                       <i class="fa-solid fa-cloud-arrow-up"></i> <span>Publish</span>
+                   </button>`;
+
+            return `
+                <button type="button" onclick="selectTopicFromWizard(${idx}, false)" class="flex items-center gap-3 min-w-0 flex-grow text-left group">
+                    <div class="w-9 h-9 rounded-xl ${isReady ? 'bg-emerald-600 shadow-sm shadow-emerald-500/30' : 'bg-brand-600'} text-white font-black text-xs flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                        ${idx + 1}
+                    </div>
+                    <div class="min-w-0 flex-grow">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs sm:text-sm font-bold ${isReady ? 'text-emerald-950' : 'text-slate-800'} group-hover:text-brand-700 leading-snug truncate">${idx + 1}. ${topicTitle}</span>
+                            ${badgeHTML}
+                        </div>
+                        <div class="text-[10px] font-mono ${isReady ? 'text-emerald-700 font-semibold' : 'text-slate-400'} truncate mt-0.5">${fname}</div>
+                    </div>
+                </button>
+                ${publishBtnHTML}
+            `;
+        }
+
+        function updateWizardSubjectProgressPill() {
+            const subjObj = REPO_CATALOG[selectedBatch].subjects[selectedSubjectIndex];
+            let readyCount = 0;
+            subjObj.topics.forEach((topicTitle, idx) => {
+                const fname = sanitizeFilename(idx + 1, topicTitle);
+                const relPath = `questions/${selectedBatch}/${subjObj.folder}/${fname}`;
+                if (uploadedTopicsMap[relPath] > 0) readyCount++;
+            });
+            const progPill = document.getElementById('wizard-subject-progress-pill');
+            if (progPill) {
+                progPill.innerText = `${readyCount}/${subjObj.topics.length} Uploaded`;
+            }
+            const setupProg = document.getElementById('setup-subject-uploaded-count');
+            if (setupProg) {
+                setupProg.innerText = `${readyCount}/${subjObj.topics.length} Ready`;
+            }
+        }
+
         function renderWizardTopics() {
             const grid = document.getElementById('wizard-topics-grid');
             const pill = document.getElementById('wizard-selected-subject-pill');
             grid.innerHTML = '';
 
-            const subjObj = REPO_CATALOG[selectedBatch].subjects[selectedSubjectIndex];
+            const batchKey = selectedBatch;
+            const subjIdx = selectedSubjectIndex;
+            const subjObj = REPO_CATALOG[batchKey].subjects[subjIdx];
             pill.innerText = subjObj.name;
+
+            updateWizardSubjectProgressPill();
 
             subjObj.topics.forEach((topicTitle, idx) => {
                 const fname = sanitizeFilename(idx + 1, topicTitle);
-                const isReadyOSBasics = (selectedBatch === 'ignition-2.0' && subjObj.folder === '09-os' && idx === 0);
-                const card = document.createElement('div');
-                card.className = `unit-pill-card rounded-2xl p-3.5 text-left border-2 ${isReadyOSBasics ? 'border-emerald-300 bg-emerald-50/50' : 'border-slate-200 bg-slate-50/70'} shadow-sm flex items-center justify-between gap-2`;
+                const relPath = `questions/${batchKey}/${subjObj.folder}/${fname}`;
+                const cachedCount = uploadedTopicsMap[relPath] || 0;
 
-                card.innerHTML = `
-                    <button type="button" onclick="selectTopicFromWizard(${idx}, false)" class="flex items-center gap-3 min-w-0 flex-grow text-left group">
-                        <div class="w-9 h-9 rounded-xl ${isReadyOSBasics ? 'bg-emerald-600' : 'bg-brand-600'} text-white font-black text-xs flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                            ${idx + 1}
-                        </div>
-                        <div class="min-w-0 flex-grow">
-                            <div class="flex items-center gap-1.5">
-                                <span class="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-brand-700 leading-snug truncate">${idx + 1}. ${topicTitle}</span>
-                                ${isReadyOSBasics ? '<span class="text-[9px] font-extrabold uppercase bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded shrink-0">25 Qs</span>' : ''}
-                            </div>
-                            <div class="text-[10px] font-mono text-slate-400 truncate mt-0.5">${fname}</div>
-                        </div>
-                    </button>
-                    <button type="button" onclick="selectTopicFromWizard(${idx}, true)" title="1-Click Upload .JS to GitHub for this Topic" class="shrink-0 px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-bold text-[10px] flex items-center gap-1 shadow-xs transition-colors">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> <span>Publish</span>
-                    </button>
-                `;
+                const card = document.createElement('div');
+                card.id = `wiz-topic-card-${idx}`;
+                card.className = `unit-pill-card rounded-2xl p-3.5 text-left border-2 ${cachedCount > 0 ? 'border-emerald-400 bg-emerald-50/70 shadow-sm' : 'border-slate-200 bg-slate-50/70'} flex items-center justify-between gap-2 transition-all`;
+                card.innerHTML = createWizardTopicCardHTML(idx, topicTitle, fname, cachedCount);
                 grid.appendChild(card);
+
+                // Asynchronously probe the live GitHub repository so any newly uploaded .js file automatically turns GREEN with its exact Q count!
+                probeTopicFileStatus(batchKey, subjObj.folder, idx, topicTitle).then(liveCount => {
+                    if (selectedBatch !== batchKey || selectedSubjectIndex !== subjIdx) return;
+                    if (liveCount > 0 && liveCount !== cachedCount) {
+                        const targetCard = document.getElementById(`wiz-topic-card-${idx}`);
+                        if (targetCard) {
+                            targetCard.className = `unit-pill-card rounded-2xl p-3.5 text-left border-2 border-emerald-400 bg-emerald-50/70 shadow-sm flex items-center justify-between gap-2 transition-all`;
+                            targetCard.innerHTML = createWizardTopicCardHTML(idx, topicTitle, fname, liveCount);
+                        }
+                        updateWizardSubjectProgressPill();
+                        refreshSetupTopicDropdownLabels();
+                    }
+                });
             });
         }
 
@@ -2280,6 +2400,21 @@
             handleSubjectChange();
         }
 
+        function refreshSetupTopicDropdownLabels() {
+            if (selectedBatch === 'custom') return;
+            const subjObj = REPO_CATALOG[selectedBatch].subjects[selectedSubjectIndex];
+            const topicSelect = document.getElementById('setting-topic');
+            if (!topicSelect) return;
+
+            Array.from(topicSelect.options).forEach((opt, idx) => {
+                const t = subjObj.topics[idx];
+                const relPath = `questions/${selectedBatch}/${subjObj.folder}/${sanitizeFilename(idx + 1, t)}`;
+                const qCount = uploadedTopicsMap[relPath] || 0;
+                opt.textContent = qCount > 0 ? `✅ ${idx + 1}. ${t} (${qCount} Qs)` : `${idx + 1}. ${t}`;
+            });
+            updateWizardSubjectProgressPill();
+        }
+
         function handleSubjectChange() {
             const subjSelect = document.getElementById('setting-subject');
             selectedSubjectIndex = parseInt(subjSelect.value) || 0;
@@ -2291,11 +2426,19 @@
             subjObj.topics.forEach((t, idx) => {
                 const opt = document.createElement('option');
                 opt.value = idx;
-                opt.textContent = `${idx + 1}. ${t}`;
+                const relPath = `questions/${selectedBatch}/${subjObj.folder}/${sanitizeFilename(idx + 1, t)}`;
+                const qCount = uploadedTopicsMap[relPath] || 0;
+                opt.textContent = qCount > 0 ? `✅ ${idx + 1}. ${t} (${qCount} Qs)` : `${idx + 1}. ${t}`;
                 if (idx === 0) opt.selected = true;
                 topicSelect.appendChild(opt);
+
+                // Background probe all topics in this subject so the dropdown & wizard badges stay 100% synced
+                probeTopicFileStatus(selectedBatch, subjObj.folder, idx, t).then(liveCount => {
+                    if (liveCount > 0) refreshSetupTopicDropdownLabels();
+                });
             });
 
+            updateWizardSubjectProgressPill();
             handleTopicChange();
         }
 
@@ -2332,6 +2475,8 @@
                 if (typeof rawQuestions !== 'undefined' && Array.isArray(rawQuestions) && rawQuestions.length > 0) {
                     window.rawQuestions = rawQuestions;
                     isDataLoaded = true;
+                    markTopicAsUploaded(relPath, window.rawQuestions.length);
+                    refreshSetupTopicDropdownLabels();
                     statusEl.innerText = `✓ ${window.rawQuestions.length} Qs Ready`;
                     statusEl.className = "font-extrabold text-emerald-600";
                     enableStartButton(`Begin Assessment (${window.rawQuestions.length} Qs)`);
