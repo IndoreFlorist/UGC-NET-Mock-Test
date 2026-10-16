@@ -139,6 +139,102 @@
 
     <!-- GLOBAL HIDDEN FILE INPUT (Shared cleanly by both Wizard and Setup View) -->
     <input id="global-file-upload" type="file" accept=".js" class="hidden" onchange="handleFileUpload(event)">
+    <!-- HIDDEN FILE INPUT FOR 1-CLICK GITHUB PUBLISHER -->
+    <input id="publisher-file-input" type="file" accept=".js" class="hidden" onchange="handlePublisherFileSelect(event)">
+
+    <!-- ==================== 1-CLICK GITHUB PUBLISHER MODAL ==================== -->
+    <div id="github-publish-modal" class="fixed inset-0 z-[95] bg-slate-950/75 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 fade-in">
+        <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92dvh]">
+            <!-- Header -->
+            <div class="px-6 py-4 bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-lg">
+                        <i class="fa-brands fa-github"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-300 block">Zero Manual Renaming • Option 1</span>
+                        <h3 class="text-base sm:text-lg font-black">1-Click GitHub Auto-Publisher</h3>
+                    </div>
+                </div>
+                <button type="button" onclick="closeGitHubPublisher()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
+                <!-- Auto-Detected Destination Box -->
+                <div class="p-4 rounded-2xl bg-brand-50/70 border border-brand-200 space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-brand-700">Auto-Selected Destination & Filename</span>
+                        <span id="pub-batch-pill" class="text-[10px] font-bold bg-brand-600 text-white px-2 py-0.5 rounded">Ignition 2.0</span>
+                    </div>
+                    <div id="pub-topic-label" class="text-sm font-black text-slate-800">2. Process Management by Aditi Ma'am</div>
+                    <div class="flex items-center gap-2 text-xs font-mono text-brand-800 bg-white px-2.5 py-1.5 rounded-lg border border-brand-200 break-all">
+                        <i class="fa-solid fa-folder-tree text-brand-500 shrink-0"></i>
+                        <span id="pub-target-path">questions/ignition-2.0/09-os/2__Process_Management_by_Aditi_Ma_am.js</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 pt-0.5">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-500 mr-1"></i>No matter what your downloaded `.js` file is named on your device, it will be automatically renamed and saved to the exact path above!
+                    </p>
+                </div>
+
+                <!-- Step A: Drop or Pick Random .JS File OR Paste Code -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-600">1. Provide Question Bank (.JS File or Code)</label>
+                        <label for="publisher-file-input" class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl shadow-sm transition-all inline-flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-arrow-up"></i> Select Any .JS File
+                        </label>
+                    </div>
+
+                    <div id="pub-file-banner" class="hidden items-center justify-between bg-emerald-50 border border-emerald-200 px-3.5 py-2 rounded-xl text-xs">
+                        <div class="flex items-center gap-2 font-bold text-emerald-800 truncate">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                            <span id="pub-picked-filename">random_file.js loaded</span>
+                        </div>
+                        <span id="pub-detected-qcount" class="font-extrabold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200 shrink-0">25 Qs</span>
+                    </div>
+
+                    <textarea id="pub-js-content" oninput="validatePublisherCode()" rows="5" placeholder="Or paste your var rawQuestions = [ ... ]; code directly here..." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 font-mono text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+                </div>
+
+                <!-- Step B: GitHub Repository & Token Settings (Saved in localStorage) -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">2. GitHub Connection (Saved Automatically)</span>
+                        <span id="pub-token-saved-badge" class="text-[10px] font-bold text-emerald-600 hidden"><i class="fa-solid fa-lock"></i> Saved in Browser</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">GitHub Repo (`Owner/Repo`)</label>
+                            <input type="text" id="pub-repo-input" value="IndoreFlorist/UGC-NET-Mock-Test" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">GitHub Personal Access Token (`ghp_...`)</label>
+                            <input type="password" id="pub-token-input" placeholder="Paste your ghp_... token once" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">
+                        Need a token? Go to <b>GitHub Settings → Developer settings → Personal access tokens (classic) → Generate new token</b>, check <code>repo</code>, and paste it above once.
+                    </p>
+                </div>
+
+                <!-- Status Alert inside Publisher -->
+                <div id="pub-status-box" class="hidden p-3.5 rounded-xl text-xs font-bold items-center gap-2.5"></div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3 shrink-0">
+                <button type="button" onclick="closeGitHubPublisher()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-bold text-xs hover:bg-slate-100">
+                    Cancel
+                </button>
+                <button type="button" id="pub-submit-btn" onclick="publishToGitHub()" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> <span>Auto-Rename & Push to GitHub</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- ==================== 0. COLORFUL ANIMATED ONBOARDING WIZARD POPUP ==================== -->
     <div id="onboarding-modal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300">
@@ -315,7 +411,7 @@
                 <!-- STEP 4 (FOR GITHUB REPO BATCHES): CHOOSE SPECIFIC TOPIC (.JS FILE) -->
                 <div id="wizard-step-4" class="step-panel hidden space-y-4">
                     <div class="flex flex-wrap items-center justify-between gap-2 pb-1">
-                        <p class="text-xs md:text-sm text-slate-500 font-semibold">Select the Topic (`.js` file) to load from your GitHub repository:</p>
+                        <p class="text-xs md:text-sm text-slate-500 font-semibold">Select the Topic (`.js` file) to load or publish to GitHub:</p>
                         <span id="wizard-selected-subject-pill" class="text-xs font-extrabold px-3 py-1 rounded-full bg-indigo-100 text-indigo-800">Unit V: Operating System</span>
                     </div>
                     <div id="wizard-topics-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[52vh] overflow-y-auto pr-1"></div>
@@ -422,7 +518,7 @@
                         <span class="text-xs font-bold tracking-wider uppercase text-brand-100">JRFAdda Ignition CBT</span>
                     </div>
                     <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-3 leading-tight tracking-tight">UGC NET / JRF <br><span class="text-brand-300">Paper 1 & Paper 2</span></h1>
-                    <p class="text-brand-100 text-xs sm:text-sm opacity-90 leading-relaxed">Master all 20 Curriculum Units & Ignition 1.0 / 2.0 PYQs with precision analytics, customizable pacing, and real-time progress tracking.</p>
+                    <p class="text-brand-100 text-xs sm:text-sm opacity-90 leading-relaxed">Master all 20 Curriculum Units & Ignition 1.0 / 2.0 PYQs with precision analytics, customizable pacing, and 1-Click GitHub Auto-Publishing.</p>
                 </div>
                 
                 <!-- Instant Ready 25-Question OS Basics Launcher -->
@@ -439,17 +535,17 @@
                     </div>
 
                     <div class="hidden sm:flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
-                        <i class="fa-solid fa-layer-group text-brand-300 text-lg w-6 text-center"></i>
+                        <i class="fa-brands fa-github text-brand-300 text-lg w-6 text-center"></i>
                         <div>
-                            <div class="text-xs font-bold text-white">Clean GitHub Folder Structure</div>
-                            <div class="text-[11px] text-brand-200">No dummy files • Upload fresh .JS anytime</div>
+                            <div class="text-xs font-bold text-white">1-Click GitHub Publisher</div>
+                            <div class="text-[11px] text-brand-200">Auto-renames & pushes your .JS files</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="relative z-10 text-xs text-brand-200/70 flex items-center justify-between border-t border-white/10 pt-4">
                     <span>50/50 Laptop & Smartphone Pro UI</span>
-                    <span class="font-semibold text-brand-200">v3.6 Clean Repo</span>
+                    <span class="font-semibold text-brand-200">v4.0 Auto-Publish</span>
                 </div>
                 
                 <!-- Decorative Blur Circles -->
@@ -484,9 +580,14 @@
                             <h2 class="text-xl sm:text-2xl font-extrabold text-slate-800">Configure Your Assessment</h2>
                             <p class="text-xs text-slate-500 font-medium mt-0.5">Choose your batch or local file, subject, and timer pacing</p>
                         </div>
-                        <label for="global-file-upload" class="cursor-pointer text-xs font-bold text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-3.5 py-2 rounded-lg transition-colors flex items-center gap-1.5 border border-amber-200">
-                            <i class="fa-solid fa-upload"></i> Quick Upload .JS
-                        </label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="openGitHubPublisher()" class="text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-brands fa-github"></i> 1-Click Publish to GitHub
+                            </button>
+                            <label for="global-file-upload" class="cursor-pointer text-xs font-bold text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5 border border-amber-200">
+                                <i class="fa-solid fa-upload"></i> Local .JS
+                            </label>
+                        </div>
                     </div>
                     
                     <div class="space-y-5">
@@ -530,16 +631,16 @@
 
                             <div class="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-200/80 text-xs">
                                 <div class="flex items-center gap-2 min-w-0">
-                                    <span class="text-[11px] font-bold text-slate-400 shrink-0">Expected GitHub File:</span>
-                                    <code id="repo-file-path" class="bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-700 font-mono text-[11px] truncate max-w-[190px] sm:max-w-md">questions/...</code>
-                                    <button type="button" onclick="copyExpectedFileName()" title="Copy exact .js filename" class="text-slate-500 hover:text-brand-600 bg-white border border-slate-200 px-2 py-0.5 rounded text-[11px] font-bold shrink-0">
-                                        <i class="fa-regular fa-copy"></i> Copy Name
-                                    </button>
+                                    <span class="text-[11px] font-bold text-slate-400 shrink-0">Target File:</span>
+                                    <code id="repo-file-path" class="bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-700 font-mono text-[11px] truncate max-w-[180px] sm:max-w-xs">questions/...</code>
                                 </div>
-                                <div class="flex items-center gap-3">
+                                <div class="flex flex-wrap items-center gap-2.5">
                                     <span id="repo-file-status" class="font-extrabold text-emerald-600">Checking...</span>
-                                    <button type="button" onclick="fetchSelectedTopicJS()" class="text-brand-600 hover:text-brand-800 font-bold flex items-center gap-1">
-                                        <i class="fa-solid fa-rotate"></i> Check Again
+                                    <button type="button" onclick="openGitHubPublisher()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded-lg text-[11px] shadow-xs transition-all flex items-center gap-1">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload / Update This Topic
+                                    </button>
+                                    <button type="button" onclick="fetchSelectedTopicJS()" class="text-brand-600 hover:text-brand-800 font-bold flex items-center gap-1 text-[11px]">
+                                        <i class="fa-solid fa-rotate"></i> Refresh
                                     </button>
                                 </div>
                             </div>
@@ -1165,8 +1266,7 @@
             }
         };
 
-        // ==================== 3. REPOSITORY CATALOG (EXACT CHRONOLOGICAL ORDER FROM YOUR DIRECTORY FILES) ====================
-        // Uses 2 underscores after the topic number so 1__OS_Basics_by_Aditi_Ma_am.js matches your exact uploaded filename!
+        // ==================== 3. REPOSITORY CATALOG (EXACT CHRONOLOGICAL ORDER) ====================
         function sanitizeFilename(idx, title) {
             const clean = title.replace(/^\d+[\.\s]+/, '').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
             return `${idx}__${clean}.js`;
@@ -1587,7 +1687,6 @@
             }
         };
 
-        // Curated Motivational Quotes on Consistency, Discipline, and Continuous Improvement
         const consistencyQuotes = [
             {
                 quote: "It is not the score of a single mock test that defines your JRF journey, but your unwavering discipline to show up, analyze your mistakes, and improve 1% every single day.",
@@ -1648,7 +1747,202 @@
             openOnboardingWizard();
         });
 
-        // ==================== 5. COLORFUL ONBOARDING WIZARD FUNCTIONS ====================
+        // ==================== 5. 1-CLICK GITHUB AUTO-PUBLISHER FUNCTIONS ====================
+        function openGitHubPublisher() {
+            if (selectedBatch === 'custom') {
+                // Switch to Ignition 2.0 if user was on Custom tab
+                selectBatch('ignition-2.0');
+            }
+            const batchObj = REPO_CATALOG[selectedBatch];
+            const subjObj = batchObj.subjects[selectedSubjectIndex];
+            const topicTitle = subjObj.topics[selectedTopicIndex];
+            const fileName = sanitizeFilename(selectedTopicIndex + 1, topicTitle);
+            const targetPath = `questions/${selectedBatch}/${subjObj.folder}/${fileName}`;
+
+            document.getElementById('pub-batch-pill').innerText = `${batchObj.label} • ${subjObj.name}`;
+            document.getElementById('pub-topic-label').innerText = `${selectedTopicIndex + 1}. ${topicTitle}`;
+            document.getElementById('pub-target-path').innerText = targetPath;
+
+            // Load saved GitHub Repo & Token from localStorage
+            const savedRepo = localStorage.getItem('jrf_gh_repo') || 'IndoreFlorist/UGC-NET-Mock-Test';
+            const savedToken = localStorage.getItem('jrf_gh_token') || '';
+            document.getElementById('pub-repo-input').value = savedRepo;
+            document.getElementById('pub-token-input').value = savedToken;
+            document.getElementById('pub-token-saved-badge').classList.toggle('hidden', !savedToken);
+
+            // Reset status box
+            const statusBox = document.getElementById('pub-status-box');
+            statusBox.classList.add('hidden');
+            statusBox.classList.remove('flex');
+
+            const modal = document.getElementById('github-publish-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeGitHubPublisher() {
+            const modal = document.getElementById('github-publish-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function handlePublisherFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                document.getElementById('pub-js-content').value = content;
+                document.getElementById('pub-picked-filename').innerText = `Selected: ${file.name} (Will auto-rename!)`;
+                validatePublisherCode();
+            };
+            reader.readAsText(file);
+        }
+
+        function validatePublisherCode() {
+            const code = document.getElementById('pub-js-content').value.trim();
+            const banner = document.getElementById('pub-file-banner');
+            const countBadge = document.getElementById('pub-detected-qcount');
+            if (!code) {
+                banner.classList.add('hidden');
+                banner.classList.remove('flex');
+                return 0;
+            }
+            try {
+                const fn = new Function(code + "\n;return typeof rawQuestions !== 'undefined' ? rawQuestions : null;");
+                const arr = fn();
+                if (Array.isArray(arr) && arr.length > 0) {
+                    banner.classList.remove('hidden');
+                    banner.classList.add('flex');
+                    countBadge.innerText = `✓ ${arr.length} Questions Validated`;
+                    return arr.length;
+                }
+            } catch (e) {}
+            return 0;
+        }
+
+        function setPublisherStatus(msg, type) {
+            const box = document.getElementById('pub-status-box');
+            box.classList.remove('hidden');
+            box.classList.add('flex');
+            if (type === 'loading') {
+                box.className = "p-3.5 rounded-xl text-xs font-bold flex items-center gap-2.5 bg-blue-50 text-blue-700 border border-blue-200";
+                box.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-base"></i> <span>${msg}</span>`;
+            } else if (type === 'success') {
+                box.className = "p-3.5 rounded-xl text-xs font-bold flex items-center gap-2.5 bg-emerald-50 text-emerald-800 border border-emerald-200";
+                box.innerHTML = `<i class="fa-solid fa-circle-check text-base text-emerald-600"></i> <span>${msg}</span>`;
+            } else {
+                box.className = "p-3.5 rounded-xl text-xs font-bold flex items-center gap-2.5 bg-red-50 text-red-700 border border-red-200";
+                box.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>${msg}</span>`;
+            }
+        }
+
+        async function publishToGitHub() {
+            const code = document.getElementById('pub-js-content').value.trim();
+            const repo = document.getElementById('pub-repo-input').value.trim();
+            const token = document.getElementById('pub-token-input').value.trim();
+            const targetPath = document.getElementById('pub-target-path').innerText.trim();
+
+            if (!code) {
+                setPublisherStatus("Please select a .js file or paste your rawQuestions code first.", "error");
+                return;
+            }
+
+            let parsedArr = null;
+            try {
+                const fn = new Function(code + "\n;return typeof rawQuestions !== 'undefined' ? rawQuestions : null;");
+                parsedArr = fn();
+            } catch (err) {
+                setPublisherStatus("JavaScript syntax error in your rawQuestions code. Please verify it.", "error");
+                return;
+            }
+
+            if (!Array.isArray(parsedArr) || parsedArr.length === 0) {
+                setPublisherStatus("Could not find a valid non-empty 'rawQuestions' array in the code.", "error");
+                return;
+            }
+
+            if (!repo || !repo.includes('/')) {
+                setPublisherStatus("Please enter a valid GitHub repository (e.g., IndoreFlorist/UGC-NET-Mock-Test).", "error");
+                return;
+            }
+
+            if (!token) {
+                setPublisherStatus("Please paste your GitHub Personal Access Token (ghp_...) once so we can upload directly.", "error");
+                return;
+            }
+
+            // Save repo & token in browser localStorage for future 1-click uploads
+            localStorage.setItem('jrf_gh_repo', repo);
+            localStorage.setItem('jrf_gh_token', token);
+            document.getElementById('pub-token-saved-badge').classList.remove('hidden');
+
+            const submitBtn = document.getElementById('pub-submit-btn');
+            submitBtn.disabled = true;
+            setPublisherStatus(`Auto-renaming & pushing ${parsedArr.length} questions to ${targetPath}...`, "loading");
+
+            try {
+                const apiUrl = `https://api.github.com/repos/${repo}/contents/${targetPath}`;
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.github+json'
+                };
+
+                // 1. Check if the file already exists on GitHub to get its SHA
+                let existingSha = null;
+                const getRes = await fetch(apiUrl, { method: 'GET', headers });
+                if (getRes.ok) {
+                    const existingData = await getRes.json();
+                    existingSha = existingData.sha;
+                }
+
+                // 2. Encode UTF-8 string cleanly to Base64
+                const utf8Bytes = new TextEncoder().encode(code);
+                let binaryStr = "";
+                for (let i = 0; i < utf8Bytes.length; i++) {
+                    binaryStr += String.fromCharCode(utf8Bytes[i]);
+                }
+                const base64Content = btoa(binaryStr);
+
+                // 3. Push file via PUT
+                const putBody = {
+                    message: `Published ${parsedArr.length} Qs to ${targetPath} via 1-Click Mock Portal`,
+                    content: base64Content
+                };
+                if (existingSha) putBody.sha = existingSha;
+
+                const putRes = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: { ...headers, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(putBody)
+                });
+
+                if (!putRes.ok) {
+                    const errJson = await putRes.json().catch(() => ({}));
+                    throw new Error(errJson.message || `GitHub API Error (${putRes.status})`);
+                }
+
+                // Load the questions immediately into the live session so the user doesn't even have to wait for GitHub Pages cache!
+                window.rawQuestions = parsedArr;
+                isDataLoaded = true;
+                const statusEl = document.getElementById('repo-file-status');
+                statusEl.innerText = `✓ ${parsedArr.length} Qs Published & Ready!`;
+                statusEl.className = "font-extrabold text-emerald-600";
+                enableStartButton(`Begin Assessment (${parsedArr.length} Qs)`);
+
+                setPublisherStatus(`Success! Automatically renamed & saved to GitHub (${parsedArr.length} Qs). You can start the test right now!`, "success");
+                setTimeout(() => {
+                    closeGitHubPublisher();
+                }, 1400);
+            } catch (error) {
+                setPublisherStatus(`Upload failed: ${error.message}. Check your token permissions ('repo' scope).`, "error");
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        // ==================== 6. COLORFUL ONBOARDING WIZARD FUNCTIONS ====================
         function openOnboardingWizard() {
             const modal = document.getElementById('onboarding-modal');
             modal.classList.remove('hidden');
@@ -1699,7 +1993,7 @@
                 backBtn.classList.add('inline-flex');
                 progressBar.style.width = '100%';
                 stepBadge.innerText = 'Step 4 of 4 • Topic (.js File)';
-                title.innerText = 'Select Your Topic Question Bank';
+                title.innerText = 'Select Topic to Practice or 1-Click Publish';
                 renderWizardTopics();
             } else if (step === 5) {
                 backBtn.classList.remove('hidden');
@@ -1820,33 +2114,40 @@
             subjObj.topics.forEach((topicTitle, idx) => {
                 const fname = sanitizeFilename(idx + 1, topicTitle);
                 const isReadyOSBasics = (selectedBatch === 'ignition-2.0' && subjObj.folder === '09-os' && idx === 0);
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = `unit-pill-card rounded-2xl p-3.5 text-left border-2 ${isReadyOSBasics ? 'border-emerald-300 bg-emerald-50/50 hover:border-emerald-500' : 'border-slate-200 hover:border-brand-500 bg-slate-50/70 hover:bg-brand-50/40'} shadow-sm flex items-center gap-3.5 group`;
-                btn.onclick = () => {
-                    document.getElementById('setting-topic').value = idx;
-                    handleTopicChange();
-                    closeOnboardingWizard();
-                };
+                const card = document.createElement('div');
+                card.className = `unit-pill-card rounded-2xl p-3.5 text-left border-2 ${isReadyOSBasics ? 'border-emerald-300 bg-emerald-50/50' : 'border-slate-200 bg-slate-50/70'} shadow-sm flex items-center justify-between gap-2`;
 
-                btn.innerHTML = `
-                    <div class="w-9 h-9 rounded-xl ${isReadyOSBasics ? 'bg-emerald-600' : 'bg-brand-600'} text-white font-black text-xs flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                        ${idx + 1}
-                    </div>
-                    <div class="min-w-0 flex-grow">
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-brand-700 leading-snug truncate">${idx + 1}. ${topicTitle}</span>
-                            ${isReadyOSBasics ? '<span class="text-[9px] font-extrabold uppercase bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded shrink-0">25 Qs Ready</span>' : ''}
+                card.innerHTML = `
+                    <button type="button" onclick="selectTopicFromWizard(${idx}, false)" class="flex items-center gap-3 min-w-0 flex-grow text-left group">
+                        <div class="w-9 h-9 rounded-xl ${isReadyOSBasics ? 'bg-emerald-600' : 'bg-brand-600'} text-white font-black text-xs flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            ${idx + 1}
                         </div>
-                        <div class="text-[10px] font-mono text-slate-400 truncate mt-0.5">${fname}</div>
-                    </div>
-                    <i class="fa-solid fa-play ${isReadyOSBasics ? 'text-emerald-600' : 'text-brand-600'} text-xs"></i>
+                        <div class="min-w-0 flex-grow">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-brand-700 leading-snug truncate">${idx + 1}. ${topicTitle}</span>
+                                ${isReadyOSBasics ? '<span class="text-[9px] font-extrabold uppercase bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded shrink-0">25 Qs</span>' : ''}
+                            </div>
+                            <div class="text-[10px] font-mono text-slate-400 truncate mt-0.5">${fname}</div>
+                        </div>
+                    </button>
+                    <button type="button" onclick="selectTopicFromWizard(${idx}, true)" title="1-Click Upload .JS to GitHub for this Topic" class="shrink-0 px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-bold text-[10px] flex items-center gap-1 shadow-xs transition-colors">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> <span>Publish</span>
+                    </button>
                 `;
-                grid.appendChild(btn);
+                grid.appendChild(card);
             });
         }
 
-        // ==================== 6. DRAG & DROP AND LOCAL .JS UPLOAD HANDLERS ====================
+        function selectTopicFromWizard(idx, openPublisherAfter) {
+            document.getElementById('setting-topic').value = idx;
+            handleTopicChange();
+            closeOnboardingWizard();
+            if (openPublisherAfter) {
+                setTimeout(() => openGitHubPublisher(), 120);
+            }
+        }
+
+        // ==================== 7. DRAG & DROP AND LOCAL .JS UPLOAD HANDLERS ====================
         function handleDragOver(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -1932,7 +2233,7 @@
             reader.readAsText(file);
         }
 
-        // ==================== 7. SETUP SCREEN & REPO FETCH FUNCTIONS ====================
+        // ==================== 8. SETUP SCREEN & REPO FETCH FUNCTIONS ====================
         function updateBatchTabStyles(batchKey) {
             ['ignition-2.0', 'ignition-1.0', 'paper-1', 'custom'].forEach(key => {
                 const btn = document.getElementById('batch-btn-' + key);
@@ -1969,7 +2270,6 @@
                 const opt = document.createElement('option');
                 opt.value = idx;
                 opt.textContent = s.name;
-                // Default to Operating System on Ignition 2.0 so 1. OS Basics is immediately active
                 if (batchKey === 'ignition-2.0' && s.folder === '09-os') {
                     opt.selected = true;
                 }
@@ -2004,19 +2304,6 @@
             selectedTopicIndex = parseInt(topicSelect.value) || 0;
             updateSetupSummaryBanner();
             fetchSelectedTopicJS();
-        }
-
-        function copyExpectedFileName() {
-            if (selectedBatch === 'custom') return;
-            const subjObj = REPO_CATALOG[selectedBatch].subjects[selectedSubjectIndex];
-            const topicTitle = subjObj.topics[selectedTopicIndex];
-            const fileName = sanitizeFilename(selectedTopicIndex + 1, topicTitle);
-            navigator.clipboard.writeText(fileName);
-            showModal({
-                title: "Filename Copied!",
-                message: `Copied "${fileName}" to your clipboard. Save your .js file with this exact name inside "questions/${selectedBatch}/${subjObj.folder}/" in GitHub.`,
-                type: "info"
-            });
         }
 
         function fetchSelectedTopicJS() {
@@ -2062,7 +2349,6 @@
 
         function useFallbackOrWarn(folder, topicIdx, fileName) {
             const statusEl = document.getElementById('repo-file-status');
-            // Only "1. OS Basics by Aditi Ma'am" in Ignition 2.0 (09-os, topic 0) has built-in questions
             if (selectedBatch === 'ignition-2.0' && folder === '09-os' && topicIdx === 0) {
                 window.rawQuestions = JSON.parse(JSON.stringify(BUILTIN_OS_BASICS));
                 isDataLoaded = true;
@@ -2071,9 +2357,9 @@
                 enableStartButton(`Begin Assessment (25 Qs)`);
             } else {
                 isDataLoaded = false;
-                statusEl.innerText = `Not uploaded yet (${fileName})`;
+                statusEl.innerText = `Empty — Click 'Upload / Update This Topic'`;
                 statusEl.className = "font-extrabold text-rose-600";
-                disableStartButton("Upload .JS to Repo or Use Local .JS");
+                disableStartButton("Click 'Upload / Update This Topic' to Add .JS");
             }
         }
 
